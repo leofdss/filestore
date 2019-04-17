@@ -11,13 +11,19 @@ import { FileElement } from './model/element';
 export class AppComponent {
   public fileElements: Observable<FileElement[]>;
 
-  constructor(public fileService: FileService) {}
+  constructor(public fileService: FileService) { }
 
   currentRoot: FileElement;
   currentPath: string;
   canNavigateUp = false;
 
   ngOnInit() {
+    this.update();
+  }
+
+  update() {
+    this.fileService.clear();
+
     const folderA = this.fileService.add({ name: 'Folder A', isFolder: true, parent: 'root' });
     this.fileService.add({ name: 'Folder B', isFolder: true, parent: 'root' });
     this.fileService.add({ name: 'Folder C', isFolder: true, parent: folderA.id });

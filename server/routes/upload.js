@@ -1,6 +1,4 @@
-//require express library
 var express = require('express');
-//require the express router
 var router = express.Router();
 var multer = require('multer');
 const URL = require('../url');
@@ -23,7 +21,7 @@ router.use(function async(req, res, next) {
   }
 });
 
-//** Local e nome do arquivo */
+/** Local e nome do arquivo */
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     try {

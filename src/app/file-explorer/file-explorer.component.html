@@ -2,7 +2,12 @@
   <mat-icon *ngIf="canNavigateUp" class="pointer" (click)="navigateUp()">arrow_back</mat-icon>
   <span style="margin-left: 8px">{{path || 'Files'}}</span>
   <span class="spacer"></span>
-  <mat-icon class="pointer" (click)="openNewFolderDialog()">create_new_folder</mat-icon>
+  <button mat-icon-button color="primary" matTooltip="Atualizar">
+    <mat-icon class="pointer" (click)="update()">cached</mat-icon>
+  </button>
+  <button mat-icon-button color="primary" matTooltip="Criar nova pasta">
+    <mat-icon class="pointer" (click)="openNewFolderDialog()">create_new_folder</mat-icon>
+  </button>
 </mat-toolbar>
 
 <div class="container" fxFlex fxLayout="row" fxLayoutAlign="space-between stretch">

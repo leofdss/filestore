@@ -4,7 +4,6 @@ import { v4 } from 'uuid';
 import { FileElement } from '../model/element';
 import { Observable, BehaviorSubject } from 'rxjs';
 
-
 export interface IFileService {
   add(fileElement: FileElement);
   delete(id: string);
@@ -17,7 +16,7 @@ export interface IFileService {
 export class FileService implements IFileService {
   private map = new Map<string, FileElement>();
 
-  constructor() {}
+  constructor() { }
 
   add(fileElement: FileElement) {
     fileElement.id = v4();
@@ -27,6 +26,10 @@ export class FileService implements IFileService {
 
   delete(id: string) {
     this.map.delete(id);
+  }
+
+  clear() {
+    this.map = new Map<string, FileElement>();
   }
 
   update(id: string, update: Partial<FileElement>) {
