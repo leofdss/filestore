@@ -11,7 +11,9 @@ import { FileElement } from './model/element';
 export class AppComponent {
   public fileElements: Observable<FileElement[]>;
 
-  constructor(public fileService: FileService) { }
+  constructor(
+    public fileService: FileService
+  ) { }
 
   currentRoot: FileElement;
   currentPath: string;
@@ -23,18 +25,38 @@ export class AppComponent {
 
   update() {
     this.fileService.clear();
+    this.getFiles('', 'root');
+  }
 
-    const folderA = this.fileService.add({ name: 'Folder A', isFolder: true, parent: 'root' });
-    this.fileService.add({ name: 'Folder B', isFolder: true, parent: 'root' });
-    this.fileService.add({ name: 'Folder C', isFolder: true, parent: folderA.id });
-    this.fileService.add({ name: 'File A', isFolder: false, parent: 'root' });
-    this.fileService.add({ name: 'File B', isFolder: false, parent: 'root' });
-
-    this.updateFileElementQuery();
+  getFiles(url: string, parent: string) {
+    this.fileService.getFiles(url).subscribe(
+      (data: any) => {
+        console.log(data);
+        for (let item of data.files) {
+          let isFolder = true;
+          if (item.includes('.')) {
+            isFolder = false;
+          }
+          let element = {
+            name: item,
+            isFolder: isFolder,
+            parent: parent,
+            loading: false
+          }
+          this.fileService.add(element);
+        }
+        this.updateFileElementQuery();
+      }
+    );
   }
 
   addFolder(folder: { name: string }) {
-    this.fileService.add({ isFolder: true, name: folder.name, parent: this.currentRoot ? this.currentRoot.id : 'root' });
+    this.fileService.add({
+      isFolder: true,
+      loading: false,
+      name: folder.name,
+      parent: this.currentRoot ? this.currentRoot.id : 'root'
+    });
     this.updateFileElementQuery();
   }
 
@@ -48,6 +70,12 @@ export class AppComponent {
     this.updateFileElementQuery();
     this.currentPath = this.pushToPath(this.currentPath, element.name);
     this.canNavigateUp = true;
+    if (!element.loading) {
+      element.loading = true;
+      this.fileService.update(element.id, element);
+      let path = this.currentPath.replace(/[/]/g, ':');
+      this.getFiles(path, element.id);
+    }
   }
 
   navigateUp() {

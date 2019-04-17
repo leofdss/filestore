@@ -3,6 +3,9 @@ import { Injectable } from '@angular/core';
 import { v4 } from 'uuid';
 import { FileElement } from '../model/element';
 import { Observable, BehaviorSubject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+
+const URL = 'http://localhost:3000/api/storage/readdir:';
 
 export interface IFileService {
   add(fileElement: FileElement);
@@ -16,7 +19,9 @@ export interface IFileService {
 export class FileService implements IFileService {
   private map = new Map<string, FileElement>();
 
-  constructor() { }
+  constructor(
+    private http: HttpClient
+  ) { }
 
   add(fileElement: FileElement) {
     fileElement.id = v4();
@@ -56,6 +61,10 @@ export class FileService implements IFileService {
 
   get(id: string) {
     return this.map.get(id);
+  }
+
+  getFiles(folder) {
+    return this.http.get(URL + folder);
   }
 
   clone(element: FileElement) {
