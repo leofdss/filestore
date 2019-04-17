@@ -23,33 +23,44 @@ export class AppComponent {
     this.update();
   }
 
+  /** Atualiza itens na tela com o servidor */
   update() {
-    this.fileService.clear();
-    this.getFiles('', 'root');
+    if (!this.currentRoot) {
+      this.fileService.clear();
+      this.getFiles('', 'root');
+    } else {
+      this.fileService.delete(this.currentRoot.id);
+      this.currentRoot = this.fileService.add(this.fileService.clone(this.currentRoot));
+      this.getFiles(this.currentPath, this.currentRoot.id);
+    }
   }
 
+  /** Busca arquivos no servidor */
   getFiles(url: string, parent: string) {
-    this.fileService.getFiles(url).subscribe(
+    let path = url.replace(/[/]/g, ':');
+    this.fileService.getFiles(path).subscribe(
       (data: any) => {
-        console.log(data);
-        for (let item of data.files) {
-          let isFolder = true;
-          if (item.includes('.')) {
-            isFolder = false;
+        if (data.files) {
+          for (let item of data.files) {
+            let isFolder = true;
+            if (item.includes('.')) {
+              isFolder = false;
+            }
+            let element = {
+              name: item,
+              isFolder: isFolder,
+              parent: parent,
+              loading: false
+            }
+            this.fileService.add(element);
           }
-          let element = {
-            name: item,
-            isFolder: isFolder,
-            parent: parent,
-            loading: false
-          }
-          this.fileService.add(element);
+          this.updateFileElementQuery();
         }
-        this.updateFileElementQuery();
       }
     );
   }
 
+  /** Adiciona uma nova pasta */
   addFolder(folder: { name: string }) {
     this.fileService.add({
       isFolder: true,
@@ -60,11 +71,13 @@ export class AppComponent {
     this.updateFileElementQuery();
   }
 
+  /** Deletar arquivo ou pasta */
   removeElement(element: FileElement) {
     this.fileService.delete(element.id);
     this.updateFileElementQuery();
   }
 
+  /** Entra na pasta selecionada */
   navigateToFolder(element: FileElement) {
     this.currentRoot = element;
     this.updateFileElementQuery();
@@ -73,11 +86,11 @@ export class AppComponent {
     if (!element.loading) {
       element.loading = true;
       this.fileService.update(element.id, element);
-      let path = this.currentPath.replace(/[/]/g, ':');
-      this.getFiles(path, element.id);
+      this.getFiles(this.currentPath, element.id);
     }
   }
 
+  /** Retorna para pasta pai */
   navigateUp() {
     if (this.currentRoot && this.currentRoot.parent === 'root') {
       this.currentRoot = null;
@@ -90,16 +103,19 @@ export class AppComponent {
     this.currentPath = this.popFromPath(this.currentPath);
   }
 
+  /** Mover arquivo ou pasta */
   moveElement(event: { element: FileElement; moveTo: FileElement }) {
     this.fileService.update(event.element.id, { parent: event.moveTo.id });
     this.updateFileElementQuery();
   }
 
+  /** Renomear arquivo ou pasta */
   renameElement(element: FileElement) {
     this.fileService.update(element.id, { name: element.name });
     this.updateFileElementQuery();
   }
 
+  /** Atualiza elementos no HTML */
   updateFileElementQuery() {
     this.fileElements = this.fileService.queryInFolder(this.currentRoot ? this.currentRoot.id : 'root');
   }

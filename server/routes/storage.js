@@ -12,15 +12,19 @@ router.get('/readdir', function async(req, res, next) {
 });
 
 function readdir(req, res) {
-  let path;
-  if (req.params.path) {
-    path = req.params.path.replace(/:/g, '/');
-  } else {
-    path = '/'
+  try {
+    let path;
+    if (req.params.path) {
+      path = req.params.path.replace(/:/g, '/');
+    } else {
+      path = '/'
+    }
+    fs.readdir(URL.directory + path, function (err, files) {
+      res.send({ files: files });
+    });
+  } catch (error) {
+    res.status(500).send('error');
   }
-  fs.readdir(URL.directory + path, function (err, files) {
-    res.send({ "files": files });
-  });
 }
 
 module.exports = router;
