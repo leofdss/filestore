@@ -128,8 +128,22 @@ export class AppComponent {
 
   /** Mover arquivo ou pasta */
   moveElement(event: { element: FileElement; moveTo: FileElement }) {
-    this.fileService.update(event.element.id, { parent: event.moveTo.id });
-    this.updateFileElementQuery();
+    let oldPath = this.currentPath + event.element.name;
+    let path = this.currentPath + event.moveTo.name + '/' + event.element.name;
+    this.fileService.renameFiles({
+      oldPath: oldPath,
+      path: path
+    }).subscribe(data => {
+      if(event.moveTo.loading){
+        this.fileService.update(event.element.id, { parent: event.moveTo.id });
+        this.updateFileElementQuery();
+      }else{
+        this.fileService.delete(event.element.id);
+        this.updateFileElementQuery();
+      }
+    }, error => {
+      console.log(error);
+    });
   }
 
   /** Renomear arquivo ou pasta */
