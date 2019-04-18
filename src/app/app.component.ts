@@ -62,13 +62,24 @@ export class AppComponent {
 
   /** Adiciona uma nova pasta */
   addFolder(folder: { name: string }) {
-    this.fileService.add({
-      isFolder: true,
-      loading: false,
-      name: folder.name,
-      parent: this.currentRoot ? this.currentRoot.id : 'root'
-    });
-    this.updateFileElementQuery();
+    let path;
+    if (!this.currentPath) {
+      path = folder.name;
+    } else {
+      path = this.currentPath + folder.name;
+    }
+    this.fileService.createFolder(path)
+      .subscribe((data) => {
+        this.fileService.add({
+          isFolder: true,
+          loading: false,
+          name: folder.name,
+          parent: this.currentRoot ? this.currentRoot.id : 'root'
+        });
+        this.updateFileElementQuery();
+      }, (error) => {
+        console.log(error);
+      })
   }
 
   /** Deletar arquivo ou pasta */

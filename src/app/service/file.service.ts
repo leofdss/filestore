@@ -74,6 +74,12 @@ export class FileService implements IFileService {
     });
   }
 
+  createFolder(folder){
+    return this.http.post(URL, {
+      path: folder
+    });
+  }
+
   clone(element: FileElement) {
     return JSON.parse(JSON.stringify(element));
   }

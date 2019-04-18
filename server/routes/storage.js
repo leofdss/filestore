@@ -15,6 +15,26 @@ router.put('/', function async(req, res, next) {
   rename(req, res);
 });
 
+router.post('/', function async(req, res, next) {
+  createFolder(req, res);
+});
+
+function createFolder(req, res) {
+  try {
+    let path = req.body.path;
+    fs.mkdir(URL.directory + path, function (err) {
+      if (!err) {
+        res.send({ status: 'Folder created' });
+      }
+      else {
+        res.status(500).send(err);
+      }
+    });
+  } catch (error) {
+    res.status(500).send(err);
+  }
+}
+
 function rename(req, res) {
   try {
     let path = req.body.path;
