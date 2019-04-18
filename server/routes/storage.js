@@ -19,6 +19,39 @@ router.post('/', function async(req, res, next) {
   createFolder(req, res);
 });
 
+router.delete('/:path', function (req, res) {
+  deleteElement(req, res);
+});
+
+router.delete('/', function (req, res) {
+  res.status(400).send('error sintaxe');
+});
+
+function deleteElement(req, res) {
+  try {
+    let path = req.params.path.replace(/:/g, '/');
+    if (path.includes('.')) {
+      fs.unlink(URL.directory + path, function (err) {
+        if (!err) {
+          res.send({ status: 'Element deleted' });
+        } else {
+          res.status(500).send(err);
+        }
+      });
+    } else {
+      fs.rmdir(URL.directory + path, function (err) {
+        if (!err) {
+          res.send({ status: 'Element deleted' });
+        } else {
+          res.status(500).send(err);
+        }
+      });
+    }
+  } catch (error) {
+    res.status(500).send(err);
+  }
+}
+
 function createFolder(req, res) {
   try {
     let path = req.body.path;

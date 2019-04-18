@@ -84,8 +84,20 @@ export class AppComponent {
 
   /** Deletar arquivo ou pasta */
   removeElement(element: FileElement) {
-    this.fileService.delete(element.id);
-    this.updateFileElementQuery();
+    let path;
+    if (!this.currentPath) {
+      path = element.name;
+    } else {
+      path = this.currentPath + element.name;
+    }
+    path = ':' + path.replace(/[/]/g, ':');
+    this.fileService.deleteFiles(path)
+      .subscribe(data => {
+        this.fileService.delete(element.id);
+        this.updateFileElementQuery();
+      }, error => {
+        console.log(error);
+      });
   }
 
   /** Entra na pasta selecionada */

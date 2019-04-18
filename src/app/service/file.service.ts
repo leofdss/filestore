@@ -63,7 +63,7 @@ export class FileService implements IFileService {
     return this.map.get(id);
   }
 
-  getFiles(folder) {
+  getFiles(folder: string) {
     return this.http.get(URL + folder);
   }
 
@@ -74,10 +74,14 @@ export class FileService implements IFileService {
     });
   }
 
-  createFolder(folder){
+  createFolder(folder: string){
     return this.http.post(URL, {
       path: folder
     });
+  }
+
+  deleteFiles(element: string){
+    return this.http.delete(URL + element);
   }
 
   clone(element: FileElement) {
