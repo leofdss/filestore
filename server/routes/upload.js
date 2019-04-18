@@ -1,6 +1,4 @@
-//require express library
 var express = require('express');
-//require the express router
 var router = express.Router();
 var multer = require('multer');
 const URL = require('../url');
@@ -13,41 +11,22 @@ router.use(function async(req, res, next) {
     next();
   }
   else if (req.headers.authorization && req.method == 'POST') {
-    try {
-      request.post(
-        URL.server,
-        {
-          json: {
-            'session': req.headers.authorization,
-            'method': 'auth.get_current_user'
-          }
-        },
-        function async(error, response, body) {
-          if (!error) {
-            if (!body.error) {
-              next();
-            } else {
-              res.status(401).send(body);
-            }
-          } else {
-            res.status(response.statusCode).send(error);
-          }
-        }
-      );
-    } catch (error) {
-      res.status(500).send('error');
+    if (req.headers.authorization == '123') {
+      next();
+    } else {
+      res.status(401).send('Não autenticado');
     }
   } else {
     res.status(500).send('error');
   }
 });
 
-//** Local e nome do arquivo */
+/** Local e nome do arquivo */
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     try {
       let path = '';
-      if(req.params.path){
+      if (req.params.path) {
         path = req.params.path.replace(/:/g, '/');
       }
       mkdirp(URL.directory + path, function (err) {

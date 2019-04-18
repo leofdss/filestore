@@ -6,6 +6,7 @@ var logger = require('morgan');
 
 var uploadRouter = require('./routes/upload');
 var downloadRouter = require('./routes/download');
+var storageRouter = require('./routes/storage');
 
 var cors = require('cors');
 var app = express();
@@ -29,6 +30,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api/download', downloadRouter);
 app.use('/api/upload', uploadRouter);
+app.use('/api/storage', storageRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
