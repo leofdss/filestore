@@ -3,13 +3,33 @@ var router = express.Router();
 var fs = require("fs");
 const URL = require('../url');
 
-router.get('/readdir:path', function async(req, res, next) {
+router.get('/:path', function async(req, res, next) {
   readdir(req, res);
 });
 
-router.get('/readdir', function async(req, res, next) {
+router.get('/', function async(req, res, next) {
   readdir(req, res);
 });
+
+router.put('/', function async(req, res, next) {
+  rename(req, res);
+});
+
+function rename(req, res) {
+  try {
+    let path = req.body.path;
+    let oldPath = req.body.oldPath;
+    fs.rename(URL.directory + oldPath, URL.directory + path, function (err) {
+      if (!err) {
+        res.send({ status: 'renamed complete' });
+      } else {
+        res.status(500).send(err);
+      }
+    });
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
 
 function readdir(req, res) {
   try {
@@ -20,7 +40,11 @@ function readdir(req, res) {
       path = '/'
     }
     fs.readdir(URL.directory + path, function (err, files) {
-      res.send({ files: files });
+      if (!err) {
+        res.send({ files: files });
+      } else {
+        res.status(500).send('error');
+      }
     });
   } catch (error) {
     res.status(500).send('error');

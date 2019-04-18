@@ -91,7 +91,10 @@ export class FileExplorerComponent implements OnInit {
   }
 
   openRenameDialog(element: FileElement) {
-    let dialogRef = this.dialog.open(RenameDialogComponent);
+    let dialogRef = this.dialog.open(RenameDialogComponent, {
+      width: '250px',
+      data: element
+    });
     dialogRef.afterClosed().subscribe(res => {
       if (res) {
         element.name = res;

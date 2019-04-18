@@ -37,7 +37,7 @@ export class AppComponent {
 
   /** Busca arquivos no servidor */
   getFiles(url: string, parent: string) {
-    let path = url.replace(/[/]/g, ':');
+    let path = ':' + url.replace(/[/]/g, ':');
     this.fileService.getFiles(path).subscribe(
       (data: any) => {
         if (data.files) {
@@ -111,8 +111,17 @@ export class AppComponent {
 
   /** Renomear arquivo ou pasta */
   renameElement(element: FileElement) {
-    this.fileService.update(element.id, { name: element.name });
-    this.updateFileElementQuery();
+    let name = this.fileService.get(element.id).name;
+    this.fileService.renameFiles({
+      oldPath: this.currentPath + name,
+      path: this.currentPath + element.name
+    }).subscribe((data) => {
+      this.fileService.update(element.id, { name: element.name });
+      this.updateFileElementQuery();
+    }, (error) => {
+      //catch the error
+      console.error("An error occurred, ", error);
+    });
   }
 
   /** Atualiza elementos no HTML */

@@ -3,9 +3,9 @@ import { Injectable } from '@angular/core';
 import { v4 } from 'uuid';
 import { FileElement } from '../model/element';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-const URL = 'http://localhost:3000/api/storage/readdir:';
+const URL = 'http://localhost:3000/api/storage/';
 
 export interface IFileService {
   add(fileElement: FileElement);
@@ -65,6 +65,13 @@ export class FileService implements IFileService {
 
   getFiles(folder) {
     return this.http.get(URL + folder);
+  }
+
+  renameFiles(options: { oldPath: string, path: string }) {
+    return this.http.put(URL, {
+      oldPath: options.oldPath,
+      path: options.path
+    });
   }
 
   clone(element: FileElement) {
