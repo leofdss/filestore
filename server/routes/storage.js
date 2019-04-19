@@ -39,13 +39,18 @@ function deleteElement(req, res) {
         }
       });
     } else {
-      fs.rmdir(URL.directory + path, function (err) {
-        if (!err) {
-          res.send({ status: 'Element deleted' });
-        } else {
-          res.status(500).send(err);
-        }
-      });
+      if (fs.existsSync(path)) {
+        fs.readdirSync(path).forEach(function(file, index){
+          var curPath = path + "/" + file;
+          if (fs.lstatSync(curPath).isDirectory()) { // recurse
+            deleteFolderRecursive(curPath);
+          } else { // delete file
+            fs.unlinkSync(curPath);
+          }
+        });
+        fs.rmdirSync(path);
+        res.send({ status: 'Element deleted' });
+      }
     }
   } catch (error) {
     res.status(500).send(err);

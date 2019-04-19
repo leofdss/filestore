@@ -10,20 +10,63 @@
   </button>
 </mat-toolbar>
 
-<div class="container" fxFlex fxLayout="row" fxLayoutAlign="space-between stretch">
+<div class="container" fxFlex fxLayout="row" fxLayoutAlign="space-between stretch" ng2FileDrop
+  [ngClass]="{'nv-file-over': hasBaseDropZoneOver}" (fileOver)="fileOverBase($event)" [uploader]="uploader"
+  class="well my-drop-zone">
   <div class="content" fxFlex fxLayout="row">
     <mat-grid-list cols="8" rowHeight="100px" fxFlex>
       <mat-grid-tile *ngFor="let element of fileElements" class=file-or-folder>
-        <span [matMenuTriggerFor]="rootMenu" [matMenuTriggerData]="{element: element}" #menuTrigger="matMenuTrigger"></span>
-        <div fxLayout="column" fxLayoutAlign="space-between center" (click)="navigate(element)" (contextmenu)="openMenu($event, menuTrigger)">
+        <span [matMenuTriggerFor]="rootMenu" [matMenuTriggerData]="{element: element}"
+          #menuTrigger="matMenuTrigger"></span>
+        <div fxLayout="column" fxLayoutAlign="space-between center" (click)="navigate(element)"
+          (contextmenu)="openMenu($event, menuTrigger)">
           <mat-icon color="primary" class="file-or-folder-icon pointer" *ngIf="element.isFolder">folder</mat-icon>
-          <mat-icon color="primary" class="file-or-folder-icon pointer" *ngIf="!element.isFolder">insert_drive_file</mat-icon>
+          <mat-icon color="primary" class="file-or-folder-icon pointer" *ngIf="!element.isFolder">insert_drive_file
+          </mat-icon>
           <span>{{element.name}}</span>
+        </div>
+      </mat-grid-tile>
+      <mat-grid-tile *ngFor="let element of uploader.queue" class=file-or-folder>
+        <span [matMenuTriggerFor]="uploadMenu" [matMenuTriggerData]="{element: element}"
+          #menuTrigger="matMenuTrigger"></span>
+        <div fxLayout="column" fxLayoutAlign="space-between center" (click)="navigate(element)"
+          (contextmenu)="openMenu($event, menuTrigger)">
+
+          <mat-icon color="primary" class="file-or-folder-icon pointer">insert_drive_file
+            <i *ngIf="element.isSuccess" class="material-icons icon-check">check_circle</i>
+            <i *ngIf="element.isError" class="material-icons icon-error">error</i>
+            <i *ngIf="element.isCancel" class="material-icons icon-warning">warning</i>
+          </mat-icon>
+
+          <span>{{element?.file?.name}}</span>
+          <mat-progress-bar mode="determinate" [value]="element.progress"></mat-progress-bar>
         </div>
       </mat-grid-tile>
     </mat-grid-list>
   </div>
 </div>
+
+<mat-menu #uploadMenu="matMenu" [overlapTrigger]="false">
+  <ng-template matMenuContent let-element="element">
+    <button (click)="element.upload()" [disabled]="element.isReady || element.isUploading || element.isSuccess"
+      mat-menu-item>
+      <mat-icon>cloud_upload</mat-icon>
+      <span>Enviar</span>
+    </button>
+    <button mat-menu-item>
+      <mat-icon (click)="element.remove()">delete</mat-icon>
+      <span>Apagar</span>
+    </button>
+    <button (click)="element.cancel()" [disabled]="!element.isUploading" mat-menu-item>
+      <mat-icon>cancel</mat-icon>
+      <span>Cancelar</span>
+    </button>
+    <button [disabled]="!element.isSuccess" mat-menu-item>
+      <mat-icon>gradient</mat-icon>
+      <span>Ripar</span>
+    </button>
+  </ng-template>
+</mat-menu>
 
 <mat-menu #rootMenu="matMenu" [overlapTrigger]="false">
   <ng-template matMenuContent let-element="element">
@@ -45,7 +88,8 @@
 <mat-menu #moveToMenu="matMenu">
   <ng-template matMenuContent let-self="self">
     <ng-container *ngFor="let element of fileElements">
-      <button *ngIf="element.isFolder && element.id !== self.id" mat-menu-item (click)="moveElement(self, element)">{{element.name}}</button>
+      <button *ngIf="element.isFolder && element.id !== self.id" mat-menu-item
+        (click)="moveElement(self, element)">{{element.name}}</button>
     </ng-container>
   </ng-template>
 </mat-menu>

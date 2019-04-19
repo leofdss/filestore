@@ -44,6 +44,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { FileExplorerComponent } from './file-explorer.component';
 import { NewFolderDialogComponent } from './modals/newFolderDialog/newFolderDialog.component';
 import { RenameDialogComponent } from './modals/renameDialog/renameDialog.component';
+import { NgxMaskModule } from 'ngx-mask'
 
 @NgModule({
   declarations: [
@@ -90,7 +91,8 @@ import { RenameDialogComponent } from './modals/renameDialog/renameDialog.compon
     MatTreeModule,
     FileUploadModule,
     FormsModule,
-    FlexLayoutModule
+    FlexLayoutModule,
+    NgxMaskModule.forRoot()
   ],
   exports: [
     CommonModule,
@@ -133,7 +135,8 @@ import { RenameDialogComponent } from './modals/renameDialog/renameDialog.compon
     FileUploadModule,
     FormsModule,
     FlexLayoutModule,
-    FileExplorerComponent
+    FileExplorerComponent,
+    NgxMaskModule
   ],
   entryComponents: [NewFolderDialogComponent, RenameDialogComponent]
 })
