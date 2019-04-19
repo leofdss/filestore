@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FileService } from './service/file.service';
 import { Observable } from 'rxjs';
 import { FileElement } from './model/element';
+import { FileUploader } from 'ng2-file-upload';
 
 @Component({
   selector: 'app-root',
@@ -19,8 +20,11 @@ export class AppComponent {
   currentPath: string;
   canNavigateUp = false;
 
+  public uploader: FileUploader;
+
   ngOnInit() {
     this.update();
+    this.uploader = this.fileService.newFileUploader('');
   }
 
   /** Atualiza itens na tela com o servidor */
@@ -111,6 +115,8 @@ export class AppComponent {
       this.fileService.update(element.id, element);
       this.getFiles(this.currentPath, element.id);
     }
+
+    this.uploader = this.fileService.newFileUploader(this.currentPath);
   }
 
   /** Retorna para pasta pai */
@@ -123,7 +129,7 @@ export class AppComponent {
       this.currentRoot = this.fileService.get(this.currentRoot.parent);
       this.updateFileElementQuery();
     }
-    this.currentPath = this.popFromPath(this.currentPath);
+    this.currentPath = this.popFromPath(this.currentPath.replace(/[/]/g, ':'));
   }
 
   /** Mover arquivo ou pasta */
@@ -134,10 +140,10 @@ export class AppComponent {
       oldPath: oldPath,
       path: path
     }).subscribe(data => {
-      if(event.moveTo.loading){
+      if (event.moveTo.loading) {
         this.fileService.update(event.element.id, { parent: event.moveTo.id });
         this.updateFileElementQuery();
-      }else{
+      } else {
         this.fileService.delete(event.element.id);
         this.updateFileElementQuery();
       }

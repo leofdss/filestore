@@ -6,9 +6,6 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import { NewFolderDialogComponent } from './modals/newFolderDialog/newFolderDialog.component';
 import { RenameDialogComponent } from './modals/renameDialog/renameDialog.component';
 
-// const URL = '/api/';
-const URL = 'http://localhost:3000/api/upload/storage:storage';
-
 @Component({
   selector: 'app-file-explorer',
   templateUrl: './file-explorer.component.html',
@@ -20,31 +17,20 @@ export class FileExplorerComponent implements OnInit {
     public dialog: MatDialog
   ) { }
 
-  ngOnInit() {
-    this.uploader.onAfterAddingFile = (file) => { file.withCredentials = false; };
-  }
+  ngOnInit() { }
 
-  public uploader: FileUploader = new FileUploader({
-    url: URL,
-    itemAlias: 'storage',
-    authToken: '123'
-  });
+  @Output() uploaderEmitter = new EventEmitter<FileUploader>();
+  @Input() uploader: FileUploader;
 
   public hasBaseDropZoneOver: boolean = false;
-  public hasAnotherDropZoneOver: boolean = false;
 
   public fileOverBase(e: any): void {
     this.hasBaseDropZoneOver = e;
-  }
-
-  public fileOverAnother(e: any): void {
-    this.hasAnotherDropZoneOver = e;
+    //this.uploaderEmitter.emit(this.uploader);
   }
 
   public onFileSelected(event: EventEmitter<File[]>) {
     const file: File = event[0];
-
-    console.log(file);
   }
 
   @Input() fileElements: FileElement[];

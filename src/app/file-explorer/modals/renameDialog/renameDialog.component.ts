@@ -14,12 +14,12 @@ export class RenameDialogComponent implements OnInit {
   ) { }
 
   folderName: string = '';
-  ext: string;
+  ext: string = '';
 
   ngOnInit() {
     if (!this.data.isFolder) {
       let temp = this.data.name.split('.');
-      this.ext = temp[temp.length - 1];
+      this.ext = '.' + temp[temp.length - 1];
 
       temp.pop();
 

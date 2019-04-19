@@ -4,8 +4,9 @@ import { v4 } from 'uuid';
 import { FileElement } from '../model/element';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { FileUploader } from 'ng2-file-upload';
 
-const URL = 'http://localhost:3000/api/storage/';
+const URL = 'http://localhost:3000/api/';
 
 export interface IFileService {
   add(fileElement: FileElement);
@@ -22,6 +23,16 @@ export class FileService implements IFileService {
   constructor(
     private http: HttpClient
   ) { }
+
+  newFileUploader(path) {
+    let uploader = new FileUploader({
+      url: URL + 'upload/' + path,
+      itemAlias: 'storage',
+      authToken: '123'
+    })
+    uploader.onAfterAddingFile = (file) => { file.withCredentials = false; };
+    return uploader;
+  }
 
   add(fileElement: FileElement) {
     fileElement.id = v4();
@@ -64,24 +75,24 @@ export class FileService implements IFileService {
   }
 
   getFiles(folder: string) {
-    return this.http.get(URL + folder);
+    return this.http.get(URL + 'storage/' + folder);
   }
 
   renameFiles(options: { oldPath: string, path: string }) {
-    return this.http.put(URL, {
+    return this.http.put(URL + 'storage/', {
       oldPath: options.oldPath,
       path: options.path
     });
   }
 
-  createFolder(folder: string){
-    return this.http.post(URL, {
+  createFolder(folder: string) {
+    return this.http.post(URL + 'storage/', {
       path: folder
     });
   }
 
-  deleteFiles(element: string){
-    return this.http.delete(URL + element);
+  deleteFiles(element: string) {
+    return this.http.delete(URL + 'storage/' + element);
   }
 
   clone(element: FileElement) {

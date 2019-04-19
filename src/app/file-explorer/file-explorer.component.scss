@@ -1,16 +1,11 @@
 .my-drop-zone {
-  border: dotted 3px lightgray;
+  border: dotted 3px white;
 }
 .nv-file-over {
-  border: dotted 3px red;
+  border: dotted 3px blue;
 } /* Default class applied to drop zones on over */
 .another-file-over-class {
   border: dotted 3px green;
-}
-
-html,
-body {
-  height: 100%;
 }
 
 :host {
@@ -42,4 +37,27 @@ body {
 
 .spacer {
   flex: 1 1 auto;
+}
+
+%icon-status {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+.icon-check {
+  @extend %icon-status;
+  color: green;
+}
+.icon-error {
+  @extend %icon-status;
+  color: red;
+}
+.icon-warning {
+  @extend %icon-status;
+  color: yellow;
+}
+.icon-play {
+  @extend %icon-status;
+  color: main-color;
 }
