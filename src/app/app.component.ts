@@ -24,15 +24,16 @@ export class AppComponent {
 
   ngOnInit() {
     this.update();
-    this.uploader = this.fileService.newFileUploader('');
   }
-
+  
   /** Atualiza itens na tela com o servidor */
   update() {
     if (!this.currentRoot) {
+      this.uploader = this.fileService.newFileUploader('');
       this.fileService.clear();
       this.getFiles('', 'root');
     } else {
+      this.uploader = this.fileService.newFileUploader(this.currentPath);
       this.fileService.delete(this.currentRoot.id);
       this.currentRoot = this.fileService.add(this.fileService.clone(this.currentRoot));
       this.getFiles(this.currentPath, this.currentRoot.id);

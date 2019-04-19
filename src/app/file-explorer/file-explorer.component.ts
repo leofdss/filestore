@@ -26,7 +26,6 @@ export class FileExplorerComponent implements OnInit {
 
   public fileOverBase(e: any): void {
     this.hasBaseDropZoneOver = e;
-    //this.uploaderEmitter.emit(this.uploader);
   }
 
   public onFileSelected(event: EventEmitter<File[]>) {

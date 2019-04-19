@@ -31,16 +31,13 @@
           #menuTrigger="matMenuTrigger"></span>
         <div fxLayout="column" fxLayoutAlign="space-between center" (click)="navigate(element)"
           (contextmenu)="openMenu($event, menuTrigger)">
-          <div>
-            <mat-icon *ngIf="element.isError" color="primary"  matBadge="" matBadgeColor="warn" class="file-or-folder-icon pointer">insert_drive_file
-            </mat-icon>
-            <mat-icon *ngIf="element.isCancel" color="primary" matBadge="" matBadgeColor="accent" class="file-or-folder-icon pointer">insert_drive_file
-            </mat-icon>
-            <mat-icon *ngIf="element.isSuccess" color="primary"  matBadge="OK" class="file-or-folder-icon pointer">insert_drive_file
-            </mat-icon>
-            <mat-icon *ngIf="!element.isSuccess && !element.isCancel && !element.isError" color="primary" class="file-or-folder-icon pointer">insert_drive_file
-            </mat-icon>
-          </div>
+
+          <mat-icon color="primary" class="file-or-folder-icon pointer">insert_drive_file
+            <i *ngIf="element.isSuccess" class="material-icons icon-check">check_circle</i>
+            <i *ngIf="element.isError" class="material-icons icon-error">error</i>
+            <i *ngIf="element.isCancel" class="material-icons icon-warning">warning</i>
+          </mat-icon>
+
           <span>{{element?.file?.name}}</span>
           <mat-progress-bar mode="determinate" [value]="element.progress"></mat-progress-bar>
         </div>
