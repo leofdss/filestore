@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var multer = require('multer');
 const URL = require('../url');
-let mkdirp = require('mkdirp');
+var mkdirp = require('mkdirp');
 
 /** Local e nome do arquivo */
 var storage = multer.diskStorage({

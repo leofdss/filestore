@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { v4 } from 'uuid';
 import { FileElement } from '../model/element';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FileUploader } from 'ng2-file-upload';
 
 const URL = 'http://localhost:3000/api/';
@@ -32,6 +32,16 @@ export class FileService implements IFileService {
     })
     uploader.onAfterAddingFile = (file) => { file.withCredentials = false; };
     return uploader;
+  }
+
+  public resource_download(path): Observable<Object> {
+    return this.http.get(URL + path, {
+      responseType: 'blob',
+      headers: new HttpHeaders({
+        'Authorization': '123',
+        'Content-Type': 'application/json'
+      }),
+    });
   }
 
   add(fileElement: FileElement) {

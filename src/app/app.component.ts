@@ -69,9 +69,9 @@ export class AppComponent {
   addFolder(folder: { name: string }) {
     let path;
     if (!this.currentPath) {
-      path = folder.name;
+      path = '/' + folder.name;
     } else {
-      path = this.currentPath + folder.name;
+      path = '/' + this.currentPath + folder.name;
     }
     this.fileService.createFolder(path)
       .subscribe((data) => {
@@ -135,8 +135,15 @@ export class AppComponent {
 
   /** Mover arquivo ou pasta */
   moveElement(event: { element: FileElement; moveTo: FileElement }) {
-    let oldPath = this.currentPath + event.element.name;
-    let path = this.currentPath + event.moveTo.name + '/' + event.element.name;
+    let oldPath;
+    let path;
+    if (!this.currentPath) {
+      oldPath = '/' + event.element.name;
+      path = '/' + event.moveTo.name + '/' + event.element.name;
+    } else {
+      oldPath = '/' + this.currentPath + event.element.name;
+      path = '/' + this.currentPath + event.moveTo.name + '/' + event.element.name;
+    }
     this.fileService.renameFiles({
       oldPath: oldPath,
       path: path
@@ -156,9 +163,18 @@ export class AppComponent {
   /** Renomear arquivo ou pasta */
   renameElement(element: FileElement) {
     let name = this.fileService.get(element.id).name;
+    let oldPath;
+    let path;
+    if (!this.currentPath) {
+      oldPath = '/' + name;
+      path = '/' + element.name;
+    } else {
+      oldPath = '/' + this.currentPath + name;
+      path = '/' + this.currentPath + element.name;
+    }
     this.fileService.renameFiles({
-      oldPath: this.currentPath + name,
-      path: this.currentPath + element.name
+      oldPath: oldPath,
+      path: path
     }).subscribe((data) => {
       this.fileService.update(element.id, { name: element.name });
       this.updateFileElementQuery();
