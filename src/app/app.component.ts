@@ -3,6 +3,7 @@ import { FileService } from './service/file.service';
 import { Observable } from 'rxjs';
 import { FileElement } from './model/element';
 import { FileUploader } from 'ng2-file-upload';
+import { HttpEventType, HttpResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
@@ -25,7 +26,7 @@ export class AppComponent {
   ngOnInit() {
     this.update();
   }
-  
+
   /** Atualiza itens na tela com o servidor */
   update() {
     if (!this.currentRoot) {
@@ -38,6 +39,29 @@ export class AppComponent {
       this.currentRoot = this.fileService.add(this.fileService.clone(this.currentRoot));
       this.getFiles(this.currentPath, this.currentRoot.id);
     }
+  }
+
+  download(element: FileElement) {
+    let path;
+    if (!this.currentPath) {
+      path = element.name;
+    } else {
+      path = this.currentPath + element.name;
+    }
+    path = ':' + path.replace(/[/]/g, ':');
+    this.fileService.download(path).subscribe((event: any) => {
+      if (event.type === HttpEventType.DownloadProgress) {
+        const percentDone = Math.round(100 * event.loaded / event.total);
+        console.log('File is ' + percentDone + '% downloaded.');
+      } else if (event instanceof HttpResponse) {
+        console.log(event);
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(event.body);
+        a.download = element.name;
+        a.click();
+        console.log('File is completely downloaded!');
+      }
+    });
   }
 
   /** Busca arquivos no servidor */

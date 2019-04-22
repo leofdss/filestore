@@ -21,9 +21,10 @@
         <div fxLayout="column" fxLayoutAlign="space-between center" (click)="navigate(element)"
           (contextmenu)="openMenu($event, menuTrigger)">
           <mat-icon color="primary" class="file-or-folder-icon pointer" *ngIf="element.isFolder">folder</mat-icon>
-          <mat-icon color="primary" class="file-or-folder-icon pointer" *ngIf="!element.isFolder">insert_drive_file
+          <mat-icon color="primary" class="file-or-folder-icon pointer" *ngIf="!element.isFolder" (click)="download(element)" matTooltip="Download">insert_drive_file
           </mat-icon>
           <span>{{element.name}}</span>
+          <mat-progress-bar mode="determinate" *ngIf="!element.isFolder && element.progress" [value]="element.progress"></mat-progress-bar>
         </div>
       </mat-grid-tile>
       <mat-grid-tile *ngFor="let element of uploader.queue" class=file-or-folder>

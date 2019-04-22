@@ -2,7 +2,7 @@
   <mat-card style="height: 100%; box-sizing: border-box; padding:0">
     <app-file-explorer [fileElements]="fileElements | async" [path]="currentPath" [canNavigateUp]="canNavigateUp" (folderAdded)="addFolder($event)"
       (elementRemoved)="removeElement($event)" (navigatedDown)="navigateToFolder($event)" (navigatedUp)="navigateUp()" (elementRenamed)="renameElement($event)"
-      (elementMoved)="moveElement($event)" (updateEmitter)="update()" [uploader]="uploader">
+      (elementMoved)="moveElement($event)" (updateEmitter)="update()" [uploader]="uploader" (downloadEmitter)="download($event)">
     </app-file-explorer>
   </mat-card>
 </div>

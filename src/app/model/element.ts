@@ -4,4 +4,5 @@ export class FileElement {
   name: string;
   parent: string;
   loading: boolean;
+  progress?: number;
 }
