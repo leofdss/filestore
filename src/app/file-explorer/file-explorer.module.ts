@@ -46,13 +46,15 @@ import { NewFolderDialogComponent } from './modals/newFolderDialog/newFolderDial
 import { RenameDialogComponent } from './modals/renameDialog/renameDialog.component';
 import { NgxMaskModule } from 'ngx-mask'
 import { FileNameDirective } from '../directives/file-name.directive';
+import { ResponsiveColsDirective } from '../directives/responsive-cols.directive';
 
 @NgModule({
   declarations: [
     FileExplorerComponent,
     NewFolderDialogComponent, 
     RenameDialogComponent,
-    FileNameDirective
+    FileNameDirective,
+    ResponsiveColsDirective,
   ],
   imports: [
     CommonModule,

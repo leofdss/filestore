@@ -14,7 +14,7 @@
   [ngClass]="{'nv-file-over': hasBaseDropZoneOver}" (fileOver)="fileOverBase($event)" [uploader]="uploader"
   class="well my-drop-zone">
   <div class="content" fxFlex fxLayout="row">
-    <mat-grid-list cols="8" rowHeight="100px" fxFlex>
+    <mat-grid-list [responsiveCols]="{xs: 1, sm: 2, md: 4, lg: 6, xl: 8}" rowHeight="100px" fxFlex>
       <mat-grid-tile *ngFor="let element of fileElements" class=file-or-folder>
         <span [matMenuTriggerFor]="rootMenu" [matMenuTriggerData]="{element: element}"
           #menuTrigger="matMenuTrigger"></span>
