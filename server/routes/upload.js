@@ -3,6 +3,7 @@ var router = express.Router();
 var multer = require('multer');
 const URL = require('../url');
 var mkdirp = require('mkdirp');
+let auth = require('../middleware/auth-file');
 
 /** Local e nome do arquivo */
 var storage = multer.diskStorage({
@@ -38,7 +39,7 @@ router.get('/', function async(req, res, next) {
 });
 
 //our file upload function.
-router.post('/:path', upload.array('storage', 20), function async(req, res, next) {
+router.post('/:path', auth, upload.array('storage', 20), function async(req, res, next) {
   try {
     var paths = [];
     for (var i = 0; i < req.files.length; i++) {
@@ -52,7 +53,7 @@ router.post('/:path', upload.array('storage', 20), function async(req, res, next
 });
 
 //our file upload function.
-router.post('/', upload.array('storage', 20), function async(req, res, next) {
+router.post('/', auth, upload.array('storage', 20), function async(req, res, next) {
   try {
     var paths = [];
     for (var i = 0; i < req.files.length; i++) {
