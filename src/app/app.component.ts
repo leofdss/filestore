@@ -3,6 +3,7 @@ import { FileService } from './service/file.service';
 import { Observable } from 'rxjs';
 import { FileElement } from './model/element';
 import { FileUploader } from 'ng2-file-upload';
+import { HttpEventType, HttpResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
@@ -25,7 +26,7 @@ export class AppComponent {
   ngOnInit() {
     this.update();
   }
-  
+
   /** Atualiza itens na tela com o servidor */
   update() {
     if (!this.currentRoot) {
@@ -38,6 +39,31 @@ export class AppComponent {
       this.currentRoot = this.fileService.add(this.fileService.clone(this.currentRoot));
       this.getFiles(this.currentPath, this.currentRoot.id);
     }
+  }
+
+  download(element: FileElement) {
+    let path;
+    if (!this.currentPath) {
+      path = element.name;
+    } else {
+      path = this.currentPath + element.name;
+    }
+    path = ':' + path.replace(/[/]/g, ':');
+    this.fileService.download(path).subscribe((event: any) => {
+      if (event.type === HttpEventType.DownloadProgress) {
+        const percentDone = Math.round(100 * event.loaded / event.total);
+        this.fileService.update(element.id, { progress: percentDone });
+        console.log('File is ' + percentDone + '% downloaded.');
+      } else if (event instanceof HttpResponse) {
+        this.fileService.update(element.id, { progress: 100 });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(event.body);
+        a.download = element.name;
+        a.click();
+        console.log('File is completely downloaded!');
+      }
+      this.updateFileElementQuery();
+    });
   }
 
   /** Busca arquivos no servidor */
@@ -69,9 +95,9 @@ export class AppComponent {
   addFolder(folder: { name: string }) {
     let path;
     if (!this.currentPath) {
-      path = folder.name;
+      path = '/' + folder.name;
     } else {
-      path = this.currentPath + folder.name;
+      path = '/' + this.currentPath + folder.name;
     }
     this.fileService.createFolder(path)
       .subscribe((data) => {
@@ -135,8 +161,15 @@ export class AppComponent {
 
   /** Mover arquivo ou pasta */
   moveElement(event: { element: FileElement; moveTo: FileElement }) {
-    let oldPath = this.currentPath + event.element.name;
-    let path = this.currentPath + event.moveTo.name + '/' + event.element.name;
+    let oldPath;
+    let path;
+    if (!this.currentPath) {
+      oldPath = '/' + event.element.name;
+      path = '/' + event.moveTo.name + '/' + event.element.name;
+    } else {
+      oldPath = '/' + this.currentPath + event.element.name;
+      path = '/' + this.currentPath + event.moveTo.name + '/' + event.element.name;
+    }
     this.fileService.renameFiles({
       oldPath: oldPath,
       path: path
@@ -156,9 +189,18 @@ export class AppComponent {
   /** Renomear arquivo ou pasta */
   renameElement(element: FileElement) {
     let name = this.fileService.get(element.id).name;
+    let oldPath;
+    let path;
+    if (!this.currentPath) {
+      oldPath = '/' + name;
+      path = '/' + element.name;
+    } else {
+      oldPath = '/' + this.currentPath + name;
+      path = '/' + this.currentPath + element.name;
+    }
     this.fileService.renameFiles({
-      oldPath: this.currentPath + name,
-      path: this.currentPath + element.name
+      oldPath: oldPath,
+      path: path
     }).subscribe((data) => {
       this.fileService.update(element.id, { name: element.name });
       this.updateFileElementQuery();

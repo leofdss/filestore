@@ -39,16 +39,16 @@ function deleteElement(req, res) {
         }
       });
     } else {
-      if (fs.existsSync(path)) {
-        fs.readdirSync(path).forEach(function(file, index){
-          var curPath = path + "/" + file;
+      if (fs.existsSync(URL.directory + path)) {
+        fs.readdirSync(URL.directory + path).forEach(function(file, index){
+          var curPath = URL.directory + path + "/" + file;
           if (fs.lstatSync(curPath).isDirectory()) { // recurse
             deleteFolderRecursive(curPath);
           } else { // delete file
             fs.unlinkSync(curPath);
           }
         });
-        fs.rmdirSync(path);
+        fs.rmdirSync(URL.directory + path);
         res.send({ status: 'Element deleted' });
       }
     }

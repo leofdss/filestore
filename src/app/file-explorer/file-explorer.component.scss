@@ -61,3 +61,15 @@
   @extend %icon-status;
   color: main-color;
 }
+
+.icon-download {
+  position: absolute;
+  color: white;
+  top: 45px;
+  font-size: 120%;
+  visibility: hidden;
+}
+
+.icon-download:hover {
+  visibility: visible;
+}

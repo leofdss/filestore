@@ -14,16 +14,17 @@
   [ngClass]="{'nv-file-over': hasBaseDropZoneOver}" (fileOver)="fileOverBase($event)" [uploader]="uploader"
   class="well my-drop-zone">
   <div class="content" fxFlex fxLayout="row">
-    <mat-grid-list cols="8" rowHeight="100px" fxFlex>
+    <mat-grid-list [responsiveCols]="{xs: 1, sm: 2, md: 4, lg: 6, xl: 8}" rowHeight="100px" fxFlex>
       <mat-grid-tile *ngFor="let element of fileElements" class=file-or-folder>
         <span [matMenuTriggerFor]="rootMenu" [matMenuTriggerData]="{element: element}"
           #menuTrigger="matMenuTrigger"></span>
         <div fxLayout="column" fxLayoutAlign="space-between center" (click)="navigate(element)"
           (contextmenu)="openMenu($event, menuTrigger)">
           <mat-icon color="primary" class="file-or-folder-icon pointer" *ngIf="element.isFolder">folder</mat-icon>
-          <mat-icon color="primary" class="file-or-folder-icon pointer" *ngIf="!element.isFolder">insert_drive_file
+          <mat-icon color="primary" class="file-or-folder-icon pointer" *ngIf="!element.isFolder" (click)="download(element)" matTooltip="Download">insert_drive_file
           </mat-icon>
           <span>{{element.name}}</span>
+          <mat-progress-bar mode="determinate" *ngIf="!element.isFolder && element.progress" [value]="element.progress"></mat-progress-bar>
         </div>
       </mat-grid-tile>
       <mat-grid-tile *ngFor="let element of uploader.queue" class=file-or-folder>

@@ -41,6 +41,7 @@ export class FileExplorerComponent implements OnInit {
   @Output() elementRenamed = new EventEmitter<FileElement>();
   @Output() elementMoved = new EventEmitter<{ element: FileElement; moveTo: FileElement }>();
   @Output() navigatedDown = new EventEmitter<FileElement>();
+  @Output() downloadEmitter = new EventEmitter<FileElement>();
   @Output() navigatedUp = new EventEmitter();
   @Output() updateEmitter = new EventEmitter();
 
@@ -69,6 +70,10 @@ export class FileExplorerComponent implements OnInit {
         this.folderAdded.emit({ name: res });
       }
     });
+  }
+
+  download(element: FileElement) {
+    this.downloadEmitter.emit(element);
   }
 
   update() {
