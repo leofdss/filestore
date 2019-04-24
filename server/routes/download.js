@@ -2,8 +2,8 @@ var express = require('express');
 var router = express.Router();
 var fs = require("fs");
 const URL = require('../url');
-let pathConveter = require('path');
-let auth = require('../middleware/auth-file');
+var pathConveter = require('path');
+var auth = require('../middleware/auth-storage');
 
 router.get('/:path', auth, function async(req, res, next) {
   try {

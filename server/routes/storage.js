@@ -1,29 +1,30 @@
 var express = require('express');
 var router = express.Router();
 var fs = require("fs");
+var auth = require('../middleware/auth-storage');
 const URL = require('../url');
 
-router.get('/:path', function async(req, res, next) {
+router.get('/:path', auth, function async(req, res, next) {
   readdir(req, res);
 });
 
-router.get('/', function async(req, res, next) {
+router.get('/', auth, function async(req, res, next) {
   readdir(req, res);
 });
 
-router.put('/', function async(req, res, next) {
+router.put('/', auth, function async(req, res, next) {
   rename(req, res);
 });
 
-router.post('/', function async(req, res, next) {
+router.post('/', auth, function async(req, res, next) {
   createFolder(req, res);
 });
 
-router.delete('/:path', function (req, res) {
+router.delete('/:path', auth, function (req, res) {
   deleteElement(req, res);
 });
 
-router.delete('/', function (req, res) {
+router.delete('/', auth, function (req, res) {
   res.status(400).send('error sintaxe');
 });
 
