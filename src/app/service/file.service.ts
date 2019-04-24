@@ -87,24 +87,44 @@ export class FileService implements IFileService {
   }
 
   getFiles(folder: string) {
-    return this.http.get(URL + 'storage/' + folder);
+    return this.http.get(URL + 'storage/' + folder, {
+      headers: new HttpHeaders({
+        'Authorization': '123',
+        'Content-Type': 'application/json'
+      })
+    });
   }
 
   renameFiles(options: { oldPath: string, path: string }) {
     return this.http.put(URL + 'storage/', {
       oldPath: options.oldPath,
       path: options.path
-    });
+    }, {
+        headers: new HttpHeaders({
+          'Authorization': '123',
+          'Content-Type': 'application/json'
+        })
+      });
   }
 
   createFolder(folder: string) {
     return this.http.post(URL + 'storage/', {
       path: folder
-    });
+    }, {
+        headers: new HttpHeaders({
+          'Authorization': '123',
+          'Content-Type': 'application/json'
+        })
+      });
   }
 
   deleteFiles(element: string) {
-    return this.http.delete(URL + 'storage/' + element);
+    return this.http.delete(URL + 'storage/' + element, {
+      headers: new HttpHeaders({
+        'Authorization': '123',
+        'Content-Type': 'application/json'
+      })
+    });
   }
 
   clone(element: FileElement) {

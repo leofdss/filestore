@@ -1,29 +1,31 @@
 var express = require('express');
 var router = express.Router();
 var fs = require("fs");
+var auth = require('../middleware/auth-storage');
+var mkdirp = require('mkdirp');
 const URL = require('../url');
 
-router.get('/:path', function async(req, res, next) {
+router.get('/:path', auth, function async(req, res, next) {
   readdir(req, res);
 });
 
-router.get('/', function async(req, res, next) {
+router.get('/', auth, function async(req, res, next) {
   readdir(req, res);
 });
 
-router.put('/', function async(req, res, next) {
+router.put('/', auth, function async(req, res, next) {
   rename(req, res);
 });
 
-router.post('/', function async(req, res, next) {
+router.post('/', auth, function async(req, res, next) {
   createFolder(req, res);
 });
 
-router.delete('/:path', function (req, res) {
+router.delete('/:path', auth, function (req, res) {
   deleteElement(req, res);
 });
 
-router.delete('/', function (req, res) {
+router.delete('/', auth, function (req, res) {
   res.status(400).send('error sintaxe');
 });
 
@@ -40,7 +42,7 @@ function deleteElement(req, res) {
       });
     } else {
       if (fs.existsSync(URL.directory + path)) {
-        fs.readdirSync(URL.directory + path).forEach(function(file, index){
+        fs.readdirSync(URL.directory + path).forEach(function (file, index) {
           var curPath = URL.directory + path + "/" + file;
           if (fs.lstatSync(curPath).isDirectory()) { // recurse
             deleteFolderRecursive(curPath);
@@ -97,13 +99,29 @@ function readdir(req, res) {
     } else {
       path = '/'
     }
-    fs.readdir(URL.directory + path, function (err, files) {
-      if (!err) {
-        res.send({ files: files });
-      } else {
-        res.status(500).send('error');
-      }
-    });
+    if (!fs.existsSync(URL.directory)) {
+      mkdirp(URL.directory, function (err) {
+        if (err) {
+          res.status(500).send('error');
+        } else {
+          fs.readdir(URL.directory + path, function (err, files) {
+            if (!err) {
+              res.send({ files: files });
+            } else {
+              res.status(500).send('error');
+            }
+          });          
+        }
+      });
+    } else {
+      fs.readdir(URL.directory + path, function (err, files) {
+        if (!err) {
+          res.send({ files: files });
+        } else {
+          res.status(500).send('error');
+        }
+      });
+    }
   } catch (error) {
     res.status(500).send('error');
   }
