@@ -52,15 +52,17 @@ export class AppComponent {
     this.fileService.download(path).subscribe((event: any) => {
       if (event.type === HttpEventType.DownloadProgress) {
         const percentDone = Math.round(100 * event.loaded / event.total);
+        this.fileService.update(element.id, { progress: percentDone });
         console.log('File is ' + percentDone + '% downloaded.');
       } else if (event instanceof HttpResponse) {
-        console.log(event);
+        this.fileService.update(element.id, { progress: 100 });
         var a = document.createElement("a");
         a.href = URL.createObjectURL(event.body);
         a.download = element.name;
         a.click();
         console.log('File is completely downloaded!');
       }
+      this.updateFileElementQuery();
     });
   }
 
