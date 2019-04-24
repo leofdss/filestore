@@ -1,4 +1,5 @@
 function auth(req, res, next) {
+  //verificação do token
   try {
     if (req.headers.authorization == '123') {
       next();
