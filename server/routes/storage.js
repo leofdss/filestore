@@ -5,7 +5,7 @@ var auth = require('../middleware/auth-storage');
 var mkdirp = require('mkdirp');
 const URL = require('../url');
 
-router.get('/:path', auth, function async(req, res, next) {
+router.get('/*', auth, function async(req, res, next) {
   readdir(req, res);
 });
 
@@ -21,7 +21,7 @@ router.post('/', auth, function async(req, res, next) {
   createFolder(req, res);
 });
 
-router.delete('/:path', auth, function (req, res) {
+router.delete('/*', auth, function (req, res) {
   deleteElement(req, res);
 });
 
@@ -31,7 +31,7 @@ router.delete('/', auth, function (req, res) {
 
 function deleteElement(req, res) {
   try {
-    let path = req.params.path.replace(/:/g, '/');
+    let path = '/' + req.params[0];
     if (path.includes('.')) {
       fs.unlink(URL.directory + path, function (err) {
         if (!err) {
@@ -79,13 +79,39 @@ function rename(req, res) {
   try {
     let path = req.body.path;
     let oldPath = req.body.oldPath;
-    fs.rename(URL.directory + oldPath, URL.directory + path, function (err) {
-      if (!err) {
-        res.send({ status: 'renamed complete' });
-      } else {
-        res.status(500).send(err);
-      }
-    });
+
+    let folder = '/';
+
+    let split = path.split('/');
+
+    for (let i = 0; i < (split.leght - 1); i++) {
+      folder += split[i] + '/';
+    }
+
+    if (!fs.existsSync(URL.directory + folder)) {
+      mkdirp(URL.directory + folder, function (err) {
+        if (!err) {
+          fs.rename(URL.directory + oldPath, URL.directory + path, function (err) {
+            if (!err) {
+              res.send({ status: 'renamed complete' });
+            } else {
+              res.status(500).send(err);
+            }
+          });
+        }
+        else {
+          res.status(500).send(err);
+        }
+      });
+    } else {
+      fs.rename(URL.directory + oldPath, URL.directory + path, function (err) {
+        if (!err) {
+          res.send({ status: 'renamed complete' });
+        } else {
+          res.status(500).send(err);
+        }
+      });
+    }
   } catch (error) {
     res.status(500).send(error);
   }
@@ -93,12 +119,7 @@ function rename(req, res) {
 
 function readdir(req, res) {
   try {
-    let path;
-    if (req.params.path) {
-      path = req.params.path.replace(/:/g, '/');
-    } else {
-      path = '/'
-    }
+    let path = '/' + req.params[0];
     if (!fs.existsSync(URL.directory)) {
       mkdirp(URL.directory, function (err) {
         if (err) {
@@ -110,7 +131,7 @@ function readdir(req, res) {
             } else {
               res.status(500).send('error');
             }
-          });          
+          });
         }
       });
     } else {

@@ -6,7 +6,7 @@ import { Observable, BehaviorSubject } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpRequest } from '@angular/common/http';
 import { FileUploader } from 'ng2-file-upload';
 
-const URL = 'http://localhost:3000/api/';
+const URL = 'http://localhost:3000/api';
 
 export interface IFileService {
   add(fileElement: FileElement);
@@ -25,21 +25,22 @@ export class FileService implements IFileService {
   ) { }
 
   newFileUploader(path) {
+    console.log(path);
     let uploader = new FileUploader({
-      url: URL + 'upload/' + path,
+      url: URL + '/upload' + path,
       itemAlias: 'storage',
-      authToken: '123'
+      authToken: localStorage.getItem('session')
     })
     uploader.onAfterAddingFile = (file) => { file.withCredentials = false; };
     return uploader;
   }
 
   public download(path: string): Observable<Object> {
-    const req = new HttpRequest('GET', URL + 'download/' + path, {
+    const req = new HttpRequest('GET', URL + '/download' + path, {
       responseType: 'blob',
       reportProgress: true,
       headers: new HttpHeaders({
-        'Authorization': '123',
+        'Authorization': localStorage.getItem('session'),
         'Content-Type': 'application/json'
       })
     });
@@ -87,41 +88,41 @@ export class FileService implements IFileService {
   }
 
   getFiles(folder: string) {
-    return this.http.get(URL + 'storage/' + folder, {
+    return this.http.get(URL + '/storage' + folder, {
       headers: new HttpHeaders({
-        'Authorization': '123',
+        'Authorization': localStorage.getItem('session'),
         'Content-Type': 'application/json'
       })
     });
   }
 
   renameFiles(options: { oldPath: string, path: string }) {
-    return this.http.put(URL + 'storage/', {
+    return this.http.put(URL + '/storage', {
       oldPath: options.oldPath,
       path: options.path
     }, {
         headers: new HttpHeaders({
-          'Authorization': '123',
+          'Authorization': localStorage.getItem('session'),
           'Content-Type': 'application/json'
         })
       });
   }
 
   createFolder(folder: string) {
-    return this.http.post(URL + 'storage/', {
+    return this.http.post(URL + '/storage', {
       path: folder
     }, {
         headers: new HttpHeaders({
-          'Authorization': '123',
+          'Authorization': localStorage.getItem('session'),
           'Content-Type': 'application/json'
         })
       });
   }
 
   deleteFiles(element: string) {
-    return this.http.delete(URL + 'storage/' + element, {
+    return this.http.delete(URL + '/storage' + element, {
       headers: new HttpHeaders({
-        'Authorization': '123',
+        'Authorization': localStorage.getItem('session'),
         'Content-Type': 'application/json'
       })
     });

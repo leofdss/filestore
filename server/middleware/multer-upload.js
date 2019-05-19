@@ -6,10 +6,8 @@ const URL = require('../url');
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     try {
-      let path = '';
-      if (req.params.path) {
-        path = req.params.path.replace(/:/g, '/');
-      }
+      let path = '/' + req.params[0];
+      console.log(URL.directory + path)
       mkdirp(URL.directory + path, function (err) {
         if (err) {
           res.status(500).send('error');

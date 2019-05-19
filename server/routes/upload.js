@@ -10,7 +10,7 @@ router.get('/', function async(req, res, next) {
 });
 
 //our file upload function.
-router.post('/:path', auth, upload.array('storage', 20), function async(req, res, next) {
+router.post('/*', auth, upload.array('storage', 20), function async(req, res, next) {
   try {
     var paths = [];
     for (var i = 0; i < req.files.length; i++) {

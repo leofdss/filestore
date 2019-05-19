@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FileService } from './service/file.service';
 import { Observable } from 'rxjs';
 import { FileElement } from './model/element';
 import { FileUploader } from 'ng2-file-upload';
 import { HttpEventType, HttpResponse } from '@angular/common/http';
+import { saveAs } from 'file-saver';
 
 @Component({
   selector: 'app-root',
@@ -23,43 +24,42 @@ export class AppComponent {
 
   public uploader: FileUploader;
 
+  @Input() root: string = '';
+
   ngOnInit() {
+    localStorage.setItem('session', '123')
     this.update();
   }
 
   /** Atualiza itens na tela com o servidor */
   update() {
     if (!this.currentRoot) {
-      this.uploader = this.fileService.newFileUploader('');
+      this.uploader = this.fileService.newFileUploader('/' + this.root);
       this.fileService.clear();
-      this.getFiles('', 'root');
+      this.getFiles(this.root + '/', 'root');
     } else {
-      this.uploader = this.fileService.newFileUploader(this.currentPath);
+      this.uploader = this.fileService.newFileUploader('/' + this.root + '/' + this.currentPath);
       this.fileService.delete(this.currentRoot.id);
       this.currentRoot = this.fileService.add(this.fileService.clone(this.currentRoot));
-      this.getFiles(this.currentPath, this.currentRoot.id);
+      this.getFiles(this.root + '/' + this.currentPath, this.currentRoot.id);
     }
   }
 
   download(element: FileElement) {
     let path;
     if (!this.currentPath) {
-      path = element.name;
+      path = this.root + '/' + element.name;
     } else {
-      path = this.currentPath + element.name;
+      path = this.root + '/' + this.currentPath + element.name;
     }
-    path = ':' + path.replace(/[/]/g, ':');
     this.fileService.download(path).subscribe((event: any) => {
       if (event.type === HttpEventType.DownloadProgress) {
         const percentDone = Math.round(100 * event.loaded / event.total);
         this.fileService.update(element.id, { progress: percentDone });
         console.log('File is ' + percentDone + '% downloaded.');
       } else if (event instanceof HttpResponse) {
-        this.fileService.update(element.id, { progress: 100 });
-        var a = document.createElement("a");
-        a.href = URL.createObjectURL(event.body);
-        a.download = element.name;
-        a.click();
+        this.fileService.update(element.id, { progress: null });
+        saveAs(event.body, element.name);
         console.log('File is completely downloaded!');
       }
       this.updateFileElementQuery();
@@ -68,22 +68,23 @@ export class AppComponent {
 
   /** Busca arquivos no servidor */
   getFiles(url: string, parent: string) {
-    let path = ':' + url.replace(/[/]/g, ':');
-    this.fileService.getFiles(path).subscribe(
+    this.fileService.getFiles(url).subscribe(
       (data: any) => {
         if (data.files) {
           for (let item of data.files) {
-            let isFolder = true;
-            if (item.includes('.')) {
-              isFolder = false;
+            if (item != '.@__thumb') {
+              let isFolder = true;
+              if (item.includes('.')) {
+                isFolder = false;
+              }
+              let element = {
+                name: item,
+                isFolder: isFolder,
+                parent: parent,
+                loading: false
+              }
+              this.fileService.add(element);
             }
-            let element = {
-              name: item,
-              isFolder: isFolder,
-              parent: parent,
-              loading: false
-            }
-            this.fileService.add(element);
           }
           this.updateFileElementQuery();
         }
@@ -95,9 +96,9 @@ export class AppComponent {
   addFolder(folder: { name: string }) {
     let path;
     if (!this.currentPath) {
-      path = '/' + folder.name;
+      path = '/' + this.root + '/' + folder.name;
     } else {
-      path = '/' + this.currentPath + folder.name;
+      path = '/' + this.root + '/' + this.currentPath + folder.name;
     }
     this.fileService.createFolder(path)
       .subscribe((data) => {
@@ -117,11 +118,10 @@ export class AppComponent {
   removeElement(element: FileElement) {
     let path;
     if (!this.currentPath) {
-      path = element.name;
+      path = this.root + '/' + element.name;
     } else {
-      path = this.currentPath + element.name;
+      path = this.root + '/' + this.currentPath + element.name;
     }
-    path = ':' + path.replace(/[/]/g, ':');
     this.fileService.deleteFiles(path)
       .subscribe(data => {
         this.fileService.delete(element.id);
@@ -140,10 +140,9 @@ export class AppComponent {
     if (!element.loading) {
       element.loading = true;
       this.fileService.update(element.id, element);
-      this.getFiles(this.currentPath, element.id);
+      this.getFiles(this.root + '/' + this.currentPath, element.id);
     }
-
-    this.uploader = this.fileService.newFileUploader(this.currentPath);
+    this.uploader = this.fileService.newFileUploader('/' + this.root + '/' + this.currentPath);
   }
 
   /** Retorna para pasta pai */
@@ -156,7 +155,8 @@ export class AppComponent {
       this.currentRoot = this.fileService.get(this.currentRoot.parent);
       this.updateFileElementQuery();
     }
-    this.currentPath = this.popFromPath(this.currentPath.replace(/[/]/g, ':'));
+    this.currentPath = this.popFromPath(this.currentPath);
+    this.uploader = this.fileService.newFileUploader('/' + this.root + '/' + this.currentPath);
   }
 
   /** Mover arquivo ou pasta */
@@ -164,11 +164,11 @@ export class AppComponent {
     let oldPath;
     let path;
     if (!this.currentPath) {
-      oldPath = '/' + event.element.name;
-      path = '/' + event.moveTo.name + '/' + event.element.name;
+      oldPath = '/' + this.root + '/' + event.element.name;
+      path = '/' + this.root + '/' + event.moveTo.name + '/' + event.element.name;
     } else {
-      oldPath = '/' + this.currentPath + event.element.name;
-      path = '/' + this.currentPath + event.moveTo.name + '/' + event.element.name;
+      oldPath = '/' + this.root + '/' + this.currentPath + event.element.name;
+      path = '/' + this.root + '/' + this.currentPath + event.moveTo.name + '/' + event.element.name;
     }
     this.fileService.renameFiles({
       oldPath: oldPath,
@@ -192,11 +192,11 @@ export class AppComponent {
     let oldPath;
     let path;
     if (!this.currentPath) {
-      oldPath = '/' + name;
-      path = '/' + element.name;
+      oldPath = '/' + this.root + '/' + name;
+      path = '/' + this.root + '/' + element.name;
     } else {
-      oldPath = '/' + this.currentPath + name;
-      path = '/' + this.currentPath + element.name;
+      oldPath = '/' + this.root + '/' + this.currentPath + name;
+      path = '/' + this.root + '/' + this.currentPath + element.name;
     }
     this.fileService.renameFiles({
       oldPath: oldPath,
