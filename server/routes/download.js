@@ -9,8 +9,7 @@ router.get('/*', auth, function async(req, res, next) {
   try {
     let path = '/' + req.params[0];
     if (fs.existsSync(URL.directory + path)) {
-      console.log(URL.directory + path);
-      res.sendFile(pathConveter.join(URL.directory + path));
+      res.sendFile(pathConveter.join(fs.realpathSync(URL.directory + path)));
     } else {
       res.status(404).send('File not exist!');
     }
