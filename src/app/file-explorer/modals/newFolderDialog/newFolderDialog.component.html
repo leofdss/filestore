@@ -1,8 +1,9 @@
-<h1 mat-dialog-title>Create a new folder</h1>
+<h1 mat-dialog-title>Criar uma nova pasta</h1>
 
 <mat-dialog-content>
-  <mat-form-field class="example-full-width">
-    <input matInput placeholder="Folder Name" appFileName [(ngModel)]="folderName">
+  <mat-form-field class="example-full-width" appearance="outline">
+    <mat-label>Nome da pasta</mat-label>
+    <input matInput appFileName [(ngModel)]="folderName">
   </mat-form-field>
 </mat-dialog-content>
 

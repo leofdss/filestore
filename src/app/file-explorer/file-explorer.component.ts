@@ -28,23 +28,28 @@ export class FileExplorerComponent implements OnInit {
     this.hasBaseDropZoneOver = e;
     this.hasBaseDropZoneOver = e;
     if (!e || typeof (e) == 'object') {
-      for (let i = 0; i < this.uploader.queue.length; i++) {
-        if (this.uploader.queue[i].file.size < 300 * 1024 * 1024) {
-
-          if (!this.uploader.queue[i].isUploaded && !this.uploader.queue[i].isSuccess) {
-            this.uploader.queue[i].upload();
-          }
-
-        } else {
-          this.uploader.queue[i].isError = true;
-          alert('Arquivo maior que 300mb!');
-        }
-      }
+      this.uploadAll();
     }
   }
 
   public onFileSelected(event: EventEmitter<File[]>) {
     const file: File = event[0];
+    this.uploadAll();
+  }
+
+  uploadAll() {
+    for (let i = 0; i < this.uploader.queue.length; i++) {
+      if (this.uploader.queue[i].file.size < 300 * 1024 * 1024) {
+
+        if (!this.uploader.queue[i].isUploaded && !this.uploader.queue[i].isSuccess) {
+          this.uploader.queue[i].upload();
+        }
+
+      } else {
+        this.uploader.queue[i].isError = true;
+        alert('Arquivo maior que 300mb!');
+      }
+    }
   }
 
   @Input() fileElements: FileElement[];
