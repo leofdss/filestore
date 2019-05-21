@@ -5,12 +5,11 @@ const URL = require('../url');
 var pathConveter = require('path');
 var auth = require('../middleware/auth-storage');
 
-router.get('/:path', auth, function async(req, res, next) {
+router.get('/*', auth, function async(req, res, next) {
   try {
-    let path = URL.directory + req.params.path.replace(/:/g, '/');
-    path = path.replace(/%20/g, ' ');
-    if (fs.existsSync(path)) {
-      res.sendFile(pathConveter.join(path));
+    let path = '/' + req.params[0];
+    if (fs.existsSync(URL.directory + path)) {
+      res.sendFile(pathConveter.join(fs.realpathSync(URL.directory + path)));
     } else {
       res.status(404).send('File not exist!');
     }

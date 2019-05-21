@@ -1,49 +1,59 @@
-<mat-toolbar>
-  <mat-icon *ngIf="canNavigateUp" class="pointer" (click)="navigateUp()">arrow_back</mat-icon>
-  <span style="margin-left: 8px">{{path || 'Files'}}</span>
-  <span class="spacer"></span>
-  <button mat-icon-button color="primary" matTooltip="Atualizar">
-    <mat-icon class="pointer" (click)="update()">cached</mat-icon>
-  </button>
-  <button mat-icon-button color="primary" matTooltip="Criar nova pasta">
-    <mat-icon class="pointer" (click)="openNewFolderDialog()">create_new_folder</mat-icon>
-  </button>
-</mat-toolbar>
+<div fxLayout="column" style="overflow: hidden;">
+  <mat-toolbar>
+    <mat-icon *ngIf="canNavigateUp" class="pointer" (click)="navigateUp()">arrow_back</mat-icon>
+    <span style="margin-left: 8px">{{path || 'Arquivos'}}</span>
+    <span class="spacer"></span>
+    <button mat-icon-button color="primary" matTooltip="Atualizar">
+      <mat-icon class="pointer" (click)="update()">cached</mat-icon>
+    </button>
+    <input type="file" ng2FileSelect [uploader]="uploader" multiple style="display: none;" (change)="onFileSelected($event)" #upload/>
+    <button mat-icon-button color="primary" matTooltip="Upload" (click)="upload.click()">
+      <mat-icon class="pointer">cloud_upload</mat-icon>
+    </button>
+    <button mat-icon-button color="primary" matTooltip="Criar nova pasta">
+      <mat-icon class="pointer" (click)="openNewFolderDialog()">create_new_folder</mat-icon>
+    </button>
+  </mat-toolbar>
 
-<div class="container" fxFlex fxLayout="row" fxLayoutAlign="space-between stretch" ng2FileDrop
-  [ngClass]="{'nv-file-over': hasBaseDropZoneOver}" (fileOver)="fileOverBase($event)" [uploader]="uploader"
-  class="well my-drop-zone">
-  <div class="content" fxFlex fxLayout="row">
-    <mat-grid-list [responsiveCols]="{xs: 1, sm: 2, md: 4, lg: 6, xl: 8}" rowHeight="100px" fxFlex>
-      <mat-grid-tile *ngFor="let element of fileElements" class=file-or-folder>
-        <span [matMenuTriggerFor]="rootMenu" [matMenuTriggerData]="{element: element}"
-          #menuTrigger="matMenuTrigger"></span>
-        <div fxLayout="column" fxLayoutAlign="space-between center" (click)="navigate(element)"
-          (contextmenu)="openMenu($event, menuTrigger)">
-          <mat-icon color="primary" class="file-or-folder-icon pointer" *ngIf="element.isFolder">folder</mat-icon>
-          <mat-icon color="primary" class="file-or-folder-icon pointer" *ngIf="!element.isFolder" (click)="download(element)" matTooltip="Download">insert_drive_file
-          </mat-icon>
-          <span>{{element.name}}</span>
-          <mat-progress-bar mode="determinate" *ngIf="!element.isFolder && element.progress" [value]="element.progress"></mat-progress-bar>
-        </div>
-      </mat-grid-tile>
-      <mat-grid-tile *ngFor="let element of uploader.queue" class=file-or-folder>
-        <span [matMenuTriggerFor]="uploadMenu" [matMenuTriggerData]="{element: element}"
-          #menuTrigger="matMenuTrigger"></span>
-        <div fxLayout="column" fxLayoutAlign="space-between center" (click)="navigate(element)"
-          (contextmenu)="openMenu($event, menuTrigger)">
+  <div>
+    <div class="container" fxFlex fxLayout="row" fxLayoutAlign="space-between stretch" ng2FileDrop
+      [ngClass]="{'nv-file-over': hasBaseDropZoneOver}" (fileOver)="fileOverBase($event)" [uploader]="uploader"
+      class="well my-drop-zone">
+      <div class="content" fxFlex fxLayout="row">
+        <mat-grid-list [responsiveCols]="{xs: 1, sm: 2, md: 3, lg: 5, xl: 7}" rowHeight="100px" fxFlex>
+          <mat-grid-tile *ngFor="let element of fileElements" class=file-or-folder>
+            <span [matMenuTriggerFor]="rootMenu" [matMenuTriggerData]="{element: element}"
+              #menuTrigger="matMenuTrigger"></span>
+            <div fxLayout="column" fxLayoutAlign="space-between center" (click)="navigate(element)"
+              (contextmenu)="openMenu($event, menuTrigger)">
+              <mat-icon color="primary" class="file-or-folder-icon pointer" *ngIf="element.isFolder">folder</mat-icon>
+              <mat-icon color="primary" class="file-or-folder-icon pointer" *ngIf="!element.isFolder"
+                (click)="download(element)" matTooltip="Download">insert_drive_file
+              </mat-icon>
+              <span>{{element.name}}</span>
+              <mat-progress-bar mode="determinate" *ngIf="!element.isFolder && element.progress"
+                [value]="element.progress"></mat-progress-bar>
+            </div>
+          </mat-grid-tile>
+          <mat-grid-tile *ngFor="let element of uploader.queue" class=file-or-folder>
+            <span [matMenuTriggerFor]="uploadMenu" [matMenuTriggerData]="{element: element}"
+              #menuTrigger="matMenuTrigger"></span>
+            <div fxLayout="column" fxLayoutAlign="space-between center" (click)="navigate(element)"
+              (contextmenu)="openMenu($event, menuTrigger)">
 
-          <mat-icon color="primary" class="file-or-folder-icon pointer">insert_drive_file
-            <i *ngIf="element.isSuccess" class="material-icons icon-check">check_circle</i>
-            <i *ngIf="element.isError" class="material-icons icon-error">error</i>
-            <i *ngIf="element.isCancel" class="material-icons icon-warning">warning</i>
-          </mat-icon>
+              <mat-icon color="primary" class="file-or-folder-icon pointer">insert_drive_file
+                <i *ngIf="element.isSuccess" class="material-icons icon-check">check_circle</i>
+                <i *ngIf="element.isError" class="material-icons icon-error">error</i>
+                <i *ngIf="element.isCancel" class="material-icons icon-warning">warning</i>
+              </mat-icon>
 
-          <span>{{element?.file?.name}}</span>
-          <mat-progress-bar mode="determinate" [value]="element.progress"></mat-progress-bar>
-        </div>
-      </mat-grid-tile>
-    </mat-grid-list>
+              <span>{{element?.file?.name}}</span>
+              <mat-progress-bar mode="determinate" [value]="element.progress"></mat-progress-bar>
+            </div>
+          </mat-grid-tile>
+        </mat-grid-list>
+      </div>
+    </div>
   </div>
 </div>
 

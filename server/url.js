@@ -1,5 +1,5 @@
 module.exports = {
-  directory : 'C://Files'
+  directory : '../../Files'
 }
 
 /** O link não deve ter '/' no final */
