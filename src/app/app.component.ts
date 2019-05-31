@@ -23,11 +23,12 @@ export class AppComponent {
   canNavigateUp = false;
 
   public uploader: FileUploader;
+  clipboard: any;
 
   @Input() root: string = '';
 
   ngOnInit() {
-    localStorage.setItem('session', '123')
+    localStorage.setItem('session', '123');
     this.update();
   }
 
@@ -207,6 +208,43 @@ export class AppComponent {
     }, (error) => {
       //catch the error
       console.error("An error occurred, ", error);
+    });
+  }
+
+  cut(element: FileElement) {
+    let path = '';
+    if (!this.currentPath) {
+      path = '/' + this.root + '/' + element.name
+    } else {
+      path = '/' + this.root + '/' + this.currentPath + element.name;
+    }
+    this.clipboard = {
+      method: 'cut',
+      path: path,
+      element: element
+    }
+  }
+
+  paste(element: FileElement) {
+    let path = '';
+    if (!this.currentPath) {
+      path = '/' + this.root + '/' + element.name + '/' + this.clipboard.element.name;
+    } else {
+      path = '/' + this.root + '/' + this.currentPath + element.name + '/' + this.clipboard.element.name;
+    }
+    this.fileService.renameFiles({
+      oldPath: this.clipboard.path,
+      path: path
+    }).subscribe(data => {
+      if (element.loading) {
+        this.fileService.update(this.clipboard.element.id, { parent: element.id });
+        this.updateFileElementQuery();
+      } else {
+        this.fileService.delete(this.clipboard.element.id);
+        this.updateFileElementQuery();
+      }
+    }, error => {
+      console.log(error);
     });
   }
 
