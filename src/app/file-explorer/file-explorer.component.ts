@@ -5,6 +5,8 @@ import { FileElement } from '../model/element';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { NewFolderDialogComponent } from './modals/newFolderDialog/newFolderDialog.component';
 import { RenameDialogComponent } from './modals/renameDialog/renameDialog.component';
+import { MatIconRegistry } from "@angular/material/icon";
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-file-explorer',
@@ -14,13 +16,21 @@ import { RenameDialogComponent } from './modals/renameDialog/renameDialog.compon
 export class FileExplorerComponent implements OnInit {
 
   constructor(
-    public dialog: MatDialog
-  ) { }
+    public dialog: MatDialog,
+    private matIconRegistry: MatIconRegistry,
+    private domSanitizer: DomSanitizer
+  ) {
+    this.matIconRegistry.addSvgIcon(
+      `file_cut`,
+      this.domSanitizer.bypassSecurityTrustResourceUrl(`assets/content-cut.svg`)
+    );
+  }
 
   ngOnInit() { }
 
   @Output() uploaderEmitter = new EventEmitter<FileUploader>();
   @Input() uploader: FileUploader;
+  @Input() clipboard: FileUploader;
 
   public hasBaseDropZoneOver: boolean = false;
 
@@ -64,9 +74,19 @@ export class FileExplorerComponent implements OnInit {
   @Output() downloadEmitter = new EventEmitter<FileElement>();
   @Output() navigatedUp = new EventEmitter();
   @Output() updateEmitter = new EventEmitter();
+  @Output() copyEmitter = new EventEmitter<FileElement>();
+  @Output() cutEmitter = new EventEmitter<FileElement>();
+  @Output() pasteEmitter = new EventEmitter<FileElement>();
 
   deleteElement(element: FileElement) {
     this.elementRemoved.emit(element);
+  }
+
+  cut(element: FileElement) {
+    this.cutEmitter.emit(element);
+  }
+  paste(element: FileElement) {
+    this.pasteEmitter.emit(element);
   }
 
   navigate(element: FileElement) {

@@ -1,7 +1,9 @@
 <div style="padding: 10px; overflow: hidden;">
-  <app-file-explorer [fileElements]="fileElements | async" [path]="currentPath" [canNavigateUp]="canNavigateUp"
-    (folderAdded)="addFolder($event)" (elementRemoved)="removeElement($event)" (navigatedDown)="navigateToFolder($event)"
-    (navigatedUp)="navigateUp()" (elementRenamed)="renameElement($event)" (elementMoved)="moveElement($event)"
-    (updateEmitter)="update()" [uploader]="uploader" (downloadEmitter)="download($event)" style="overflow: hidden;">
+  <app-file-explorer [fileElements]="fileElements | async" [path]="currentPath" [canNavigateUp]="canNavigateUp" [clipboard]="clipboard"
+    (folderAdded)="addFolder($event)" (elementRemoved)="removeElement($event)"
+    (navigatedDown)="navigateToFolder($event)" (navigatedUp)="navigateUp()" (elementRenamed)="renameElement($event)"
+    (elementMoved)="moveElement($event)" (updateEmitter)="update()" [uploader]="uploader"
+    (downloadEmitter)="download($event)" (cutEmitter)="cut($event)"
+    (pasteEmitter)="paste($event)" style="overflow: hidden;">
   </app-file-explorer>
 </div>
