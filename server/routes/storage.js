@@ -22,11 +22,11 @@ router.post('/', auth, async function async(req, res, next) {
   createFolder(req, res);
 });
 
-router.delete('/*', auth, async function (req, res) {
+router.delete('/*', auth, async function async(req, res) {
   deleteElement(req, res);
 });
 
-router.delete('/', auth, async function (req, res) {
+router.delete('/', auth, async function async(req, res) {
   res.status(400).send('error sintaxe');
 });
 

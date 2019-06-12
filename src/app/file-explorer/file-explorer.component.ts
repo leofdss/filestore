@@ -30,6 +30,7 @@ export class FileExplorerComponent implements OnInit {
 
   @Output() uploaderEmitter = new EventEmitter<FileUploader>();
   @Input() uploader: FileUploader;
+  @Input() loading: boolean;
   @Input() clipboard: FileUploader;
 
   public hasBaseDropZoneOver: boolean = false;

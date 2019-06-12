@@ -3,7 +3,6 @@ import { FileService } from './service/file.service';
 import { Observable } from 'rxjs';
 import { FileElement } from './model/element';
 import { FileUploader } from 'ng2-file-upload';
-import { HttpEventType, HttpResponse } from '@angular/common/http';
 import { saveAs } from 'file-saver';
 const URL = 'http://localhost:3000/api';
 
@@ -22,6 +21,7 @@ export class AppComponent {
   currentRoot: FileElement;
   currentPath: string;
   canNavigateUp = false;
+  loading = false;
 
   public uploader: FileUploader;
   clipboard: any;
@@ -45,6 +45,9 @@ export class AppComponent {
       this.currentRoot = this.fileService.add(this.fileService.clone(this.currentRoot));
       this.getFiles(this.root + '/' + this.currentPath, this.currentRoot.id);
     }
+    this.uploader.onCompleteAll = () => {
+      this.update();
+    };
   }
 
   download(element: FileElement) {
@@ -62,8 +65,10 @@ export class AppComponent {
 
   /** Busca arquivos no servidor */
   getFiles(url: string, parent: string) {
+    this.loading = true;
     this.fileService.getFiles(url).subscribe(
       (data: any) => {
+        this.loading = false;
         if (data.files) {
           for (let item of data.files) {
             if (item != '.@__thumb') {
@@ -137,6 +142,9 @@ export class AppComponent {
       this.getFiles(this.root + '/' + this.currentPath, element.id);
     }
     this.uploader = this.fileService.newFileUploader('/' + this.root + '/' + this.currentPath);
+    this.uploader.onCompleteAll = () => {
+      this.update();
+    };
   }
 
   /** Retorna para pasta pai */
@@ -151,6 +159,9 @@ export class AppComponent {
     }
     this.currentPath = this.popFromPath(this.currentPath);
     this.uploader = this.fileService.newFileUploader('/' + this.root + '/' + this.currentPath);
+    this.uploader.onCompleteAll = () => {
+      this.update();
+    };
   }
 
   /** Mover arquivo ou pasta */
