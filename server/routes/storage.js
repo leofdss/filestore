@@ -4,6 +4,7 @@ var fs = require("fs");
 var auth = require('../middleware/auth-storage');
 var mkdirp = require('mkdirp');
 const URL = require('../url');
+const rimraf = require('rimraf');
 
 router.get('/*', auth, function async(req, res, next) {
   readdir(req, res);
@@ -42,15 +43,10 @@ function deleteElement(req, res) {
       });
     } else {
       if (fs.existsSync(URL.directory + path)) {
-        fs.readdirSync(URL.directory + path).forEach(function (file, index) {
-          var curPath = URL.directory + path + "/" + file;
-          if (fs.lstatSync(curPath).isDirectory()) { // recurse
-            deleteFolderRecursive(curPath);
-          } else { // delete file
-            fs.unlinkSync(curPath);
-          }
-        });
-        fs.rmdirSync(URL.directory + path);
+        rimraf(URL.directory + path, function () {
+          res.send({ status: 'Element deleted' });
+        })
+      } else {
         res.send({ status: 'Element deleted' });
       }
     }
