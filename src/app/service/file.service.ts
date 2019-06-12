@@ -36,15 +36,14 @@ export class FileService implements IFileService {
   }
 
   public download(path: string): Observable<Object> {
-    const req = new HttpRequest('GET', URL + '/download' + path, {
-      responseType: 'blob',
-      reportProgress: true,
-      headers: new HttpHeaders({
-        'Authorization': localStorage.getItem('session'),
-        'Content-Type': 'application/json'
-      })
-    });
-    return this.http.request(req);
+    return this.http.post(URL + '/download', {
+      path: path
+    }, {
+        headers: new HttpHeaders({
+          'Authorization': localStorage.getItem('session'),
+          'Content-Type': 'application/json'
+        })
+      });
   }
 
   add(fileElement: FileElement) {

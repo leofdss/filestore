@@ -5,6 +5,7 @@ import { FileElement } from './model/element';
 import { FileUploader } from 'ng2-file-upload';
 import { HttpEventType, HttpResponse } from '@angular/common/http';
 import { saveAs } from 'file-saver';
+const URL = 'http://localhost:3000/api';
 
 @Component({
   selector: 'app-root',
@@ -53,18 +54,10 @@ export class AppComponent {
     } else {
       path = this.root + '/' + this.currentPath + element.name;
     }
-    this.fileService.download(path).subscribe((event: any) => {
-      if (event.type === HttpEventType.DownloadProgress) {
-        const percentDone = Math.round(100 * event.loaded / event.total);
-        this.fileService.update(element.id, { progress: percentDone });
-        console.log('File is ' + percentDone + '% downloaded.');
-      } else if (event instanceof HttpResponse) {
-        this.fileService.update(element.id, { progress: null });
-        saveAs(event.body, element.name);
-        console.log('File is completely downloaded!');
-      }
-      this.updateFileElementQuery();
-    });
+    this.fileService.download(path).subscribe((data: any) => {
+      let url = URL + '/download/' + data.key;
+      saveAs(url, element.name);
+    }, () => { });
   }
 
   /** Busca arquivos no servidor */
