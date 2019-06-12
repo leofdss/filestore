@@ -4,13 +4,13 @@ var auth = require('../middleware/auth-storage');
 var upload = require('../middleware/multer-upload');
 const URL = require('../url');
 
-router.get('/', function async(req, res, next) {
+router.get('/', async function async(req, res, next) {
   // render the index page, and pass data to it.
   res.render('index', { title: 'Upload' });
 });
 
 //our file upload function.
-router.post('/*', auth, upload.array('storage', 20), function async(req, res, next) {
+router.post('/*', auth, upload.array('storage', 20), async function async(req, res, next) {
   try {
     var paths = [];
     for (var i = 0; i < req.files.length; i++) {
@@ -24,7 +24,7 @@ router.post('/*', auth, upload.array('storage', 20), function async(req, res, ne
 });
 
 //our file upload function.
-router.post('/', auth, upload.array('storage', 20), function async(req, res, next) {
+router.post('/', auth, upload.array('storage', 20), async function async(req, res, next) {
   try {
     var paths = [];
     for (var i = 0; i < req.files.length; i++) {

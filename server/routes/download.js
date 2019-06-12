@@ -11,10 +11,8 @@ var keys = [];
 router.get('/*', async function async(req, res, next) {
   try {
     let key = req.params[0];
-
     let id = keys.findIndex(obj => obj.key == key);
 
-    console.log(id);
     if (id == -1) {
       res.status(404).send('File not exist!');
     } else {
