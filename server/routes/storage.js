@@ -4,62 +4,50 @@ var fs = require("fs");
 var auth = require('../middleware/auth-storage');
 var mkdirp = require('mkdirp');
 const URL = require('../url');
+const rimraf = require('rimraf');
 
-router.get('/*', auth, function async(req, res, next) {
+router.get('/*', auth, async function async(req, res, next) {
   readdir(req, res);
 });
 
-router.get('/', auth, function async(req, res, next) {
+router.get('/', auth, async function async(req, res, next) {
   readdir(req, res);
 });
 
-router.put('/', auth, function async(req, res, next) {
+router.put('/', auth, async function async(req, res, next) {
   rename(req, res);
 });
 
-router.post('/', auth, function async(req, res, next) {
+router.post('/', auth, async function async(req, res, next) {
   createFolder(req, res);
 });
 
-router.delete('/*', auth, function (req, res) {
+router.delete('/*', auth, async function async(req, res) {
   deleteElement(req, res);
 });
 
-router.delete('/', auth, function (req, res) {
+router.delete('/', auth, async function async(req, res) {
   res.status(400).send('error sintaxe');
 });
 
-function deleteElement(req, res) {
+async function deleteElement(req, res) {
   try {
     let path = '/' + req.params[0];
-    if (path.includes('.')) {
-      fs.unlink(URL.directory + path, function (err) {
-        if (!err) {
-          res.send({ status: 'Element deleted' });
-        } else {
-          res.status(500).send(err);
-        }
-      });
-    } else {
-      if (fs.existsSync(URL.directory + path)) {
-        fs.readdirSync(URL.directory + path).forEach(function (file, index) {
-          var curPath = URL.directory + path + "/" + file;
-          if (fs.lstatSync(curPath).isDirectory()) { // recurse
-            deleteFolderRecursive(curPath);
-          } else { // delete file
-            fs.unlinkSync(curPath);
-          }
-        });
-        fs.rmdirSync(URL.directory + path);
+
+    if (fs.existsSync(URL.directory + path)) {
+      rimraf(URL.directory + path, function () {
         res.send({ status: 'Element deleted' });
-      }
+      })
+    } else {
+      res.send({ status: 'Element deleted' });
     }
+
   } catch (error) {
     res.status(500).send(err);
   }
 }
 
-function createFolder(req, res) {
+async function createFolder(req, res) {
   try {
     let path = req.body.path;
     fs.mkdir(URL.directory + path, function (err) {
@@ -75,7 +63,7 @@ function createFolder(req, res) {
   }
 }
 
-function rename(req, res) {
+async function rename(req, res) {
   try {
     let path = req.body.path;
     let oldPath = req.body.oldPath;
@@ -117,7 +105,7 @@ function rename(req, res) {
   }
 }
 
-function readdir(req, res) {
+async function readdir(req, res) {
   try {
     let path = '/' + req.params[0];
     if (!fs.existsSync(URL.directory)) {
