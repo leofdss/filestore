@@ -68,26 +68,48 @@ export class FileExplorerComponent implements OnInit {
   @Input() path: string;
 
   @Output() folderAdded = new EventEmitter<{ name: string }>();
-  @Output() elementRemoved = new EventEmitter<FileElement>();
+  @Output() elementRemoved = new EventEmitter<FileElement[]>();
   @Output() elementRenamed = new EventEmitter<FileElement>();
   @Output() elementMoved = new EventEmitter<{ element: FileElement; moveTo: FileElement }>();
   @Output() navigatedDown = new EventEmitter<FileElement>();
   @Output() downloadEmitter = new EventEmitter<FileElement>();
   @Output() navigatedUp = new EventEmitter();
   @Output() updateEmitter = new EventEmitter();
-  @Output() copyEmitter = new EventEmitter<FileElement>();
-  @Output() cutEmitter = new EventEmitter<FileElement>();
+  @Output() copyEmitter = new EventEmitter<FileElement[]>();
+  @Output() cutEmitter = new EventEmitter<FileElement[]>();
   @Output() pasteEmitter = new EventEmitter<FileElement>();
+  @Output() pastesEmitter = new EventEmitter();
 
   deleteElement(element: FileElement) {
-    this.elementRemoved.emit(element);
+    this.elementRemoved.emit([element]);
   }
-
+  deleteElements() {
+    let elements = [];
+    for (let element of this.fileElements) {
+      if (element.checked) {
+        elements.push(element);
+      }
+    }
+    this.elementRemoved.emit(elements);
+  }
   cut(element: FileElement) {
-    this.cutEmitter.emit(element);
+    this.cutEmitter.emit([element]);
+  }
+  cuts() {
+    let elements = [];
+    for (let element of this.fileElements) {
+      if (element.checked) {
+        elements.push(element);
+      }
+    }
+    console.log(elements)
+    this.cutEmitter.emit(elements);
   }
   paste(element: FileElement) {
     this.pasteEmitter.emit(element);
+  }
+  pastes(){
+    this.pastesEmitter.emit();
   }
 
   navigate(element: FileElement) {
@@ -105,7 +127,9 @@ export class FileExplorerComponent implements OnInit {
   }
 
   openNewFolderDialog() {
-    let dialogRef = this.dialog.open(NewFolderDialogComponent);
+    let dialogRef = this.dialog.open(NewFolderDialogComponent, {
+      disableClose: true
+    });
     dialogRef.afterClosed().subscribe(res => {
       if (res) {
         this.folderAdded.emit({ name: res });
@@ -123,8 +147,8 @@ export class FileExplorerComponent implements OnInit {
 
   openRenameDialog(element: FileElement) {
     let dialogRef = this.dialog.open(RenameDialogComponent, {
-      width: '250px',
-      data: element
+      data: element,
+      disableClose: true
     });
     dialogRef.afterClosed().subscribe(res => {
       if (res) {

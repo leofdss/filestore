@@ -3,8 +3,15 @@ import { FileService } from './service/file.service';
 import { Observable } from 'rxjs';
 import { FileElement } from './model/element';
 import { FileUploader } from 'ng2-file-upload';
-import { saveAs } from 'file-saver';
 const URL = 'http://localhost:3000/api';
+
+interface Clipboard {
+  method: string;
+  items: {
+    path: string;
+    element: FileElement;
+  }[];
+}
 
 @Component({
   selector: 'app-root',
@@ -15,7 +22,7 @@ export class AppComponent {
   public fileElements: Observable<FileElement[]>;
 
   constructor(
-    public fileService: FileService
+    public fileService: FileService,
   ) { }
 
   currentRoot: FileElement;
@@ -24,7 +31,7 @@ export class AppComponent {
   loading = false;
 
   public uploader: FileUploader;
-  clipboard: any;
+  clipboard: Clipboard;
 
   @Input() root: string = '';
 
@@ -59,7 +66,13 @@ export class AppComponent {
     }
     this.fileService.download(path).subscribe((data: any) => {
       let url = URL + '/download/' + data.key;
-      saveAs(url, element.name);
+
+      var a = document.createElement("a")
+      a.style.display = "none"
+      a.href = url;
+      a.download = element.name;
+      document.body.appendChild(a);
+      a.click();
     }, () => { });
   }
 
@@ -114,20 +127,24 @@ export class AppComponent {
   }
 
   /** Deletar arquivo ou pasta */
-  removeElement(element: FileElement) {
-    let path;
-    if (!this.currentPath) {
-      path = this.root + '/' + element.name;
-    } else {
-      path = this.root + '/' + this.currentPath + element.name;
+  removeElement(elements: FileElement[]) {
+    if (elements) {
+      for (let element of elements) {
+        let path;
+        if (!this.currentPath) {
+          path = this.root + '/' + element.name;
+        } else {
+          path = this.root + '/' + this.currentPath + element.name;
+        }
+        this.fileService.deleteFiles(path)
+          .subscribe(data => {
+            this.fileService.delete(element.id);
+            this.updateFileElementQuery();
+          }, error => {
+            console.log(error);
+          });
+      }
     }
-    this.fileService.deleteFiles(path)
-      .subscribe(data => {
-        this.fileService.delete(element.id);
-        this.updateFileElementQuery();
-      }, error => {
-        console.log(error);
-      });
   }
 
   /** Entra na pasta selecionada */
@@ -215,41 +232,79 @@ export class AppComponent {
     });
   }
 
-  cut(element: FileElement) {
-    let path = '';
-    if (!this.currentPath) {
-      path = '/' + this.root + '/' + element.name
-    } else {
-      path = '/' + this.root + '/' + this.currentPath + element.name;
-    }
-    this.clipboard = {
-      method: 'cut',
-      path: path,
-      element: element
+  cut(elements: FileElement[]) {
+    if (elements) {
+      this.clipboard = {
+        method: 'cut',
+        items: []
+      }
+      for (let element of elements) {
+        let path = '';
+        if (!this.currentPath) {
+          path = '/' + this.root + '/' + element.name
+        } else {
+          path = '/' + this.root + '/' + this.currentPath + element.name;
+        }
+        this.clipboard.items.push({
+          path: path,
+          element: element
+        })
+      }
     }
   }
 
-  paste(element: FileElement) {
-    let path = '';
-    if (!this.currentPath) {
-      path = '/' + this.root + '/' + element.name + '/' + this.clipboard.element.name;
-    } else {
-      path = '/' + this.root + '/' + this.currentPath + element.name + '/' + this.clipboard.element.name;
-    }
-    this.fileService.renameFiles({
-      oldPath: this.clipboard.path,
-      path: path
-    }).subscribe(data => {
-      if (element.loading) {
-        this.fileService.update(this.clipboard.element.id, { parent: element.id });
-        this.updateFileElementQuery();
+  pastes() {
+    for (let item of this.clipboard.items) {
+      let path = '';
+      if (!this.currentPath) {
+        path = '/' + this.root + '/' + item.element.name;
       } else {
-        this.fileService.delete(this.clipboard.element.id);
-        this.updateFileElementQuery();
+        path = '/' + this.root + '/' + this.currentPath + '/' + item.element.name;
       }
-    }, error => {
-      console.log(error);
-    });
+      this.fileService.renameFiles({
+        oldPath: item.path,
+        path: path
+      }).subscribe(data => {
+        if (this.currentRoot) {
+          this.fileService.update(item.element.id, { parent: this.currentRoot.id });
+          this.updateFileElementQuery();
+        } else {
+          this.fileService.update(item.element.id, { parent: 'root' });
+          this.updateFileElementQuery();
+        }
+      }, error => {
+        console.log(error);
+      });
+    }
+    this.clipboard = null;
+  }
+
+  paste(element: FileElement) {
+    if (element) {
+      for (let item of this.clipboard.items) {
+        let path = '';
+        if (!this.currentPath) {
+          path = '/' + this.root + '/' + element.name + '/' + item.element.name;
+        } else {
+          path = '/' + this.root + '/' + this.currentPath + element.name + '/' + item.element.name;
+        }
+        this.fileService.renameFiles({
+          oldPath: item.path,
+          path: path
+        }).subscribe(data => {
+          if (element.loading) {
+            this.fileService.update(item.element.id, { parent: element.id });
+            this.updateFileElementQuery();
+          } else {
+            this.fileService.delete(item.element.id);
+            this.updateFileElementQuery();
+          }
+        }, error => {
+          console.log(error);
+        });
+      }
+    }
+    this.clipboard = null;
   }
 
   /** Atualiza elementos no HTML */

@@ -18,7 +18,7 @@ router.get('/*', async function async(req, res, next) {
     } else {
       let path = keys[id].path;
       if (fs.existsSync(URL.directory + path)) {
-        res.sendFile(pathConveter.join(fs.realpathSync(URL.directory + path)));
+        res.download(pathConveter.join(fs.realpathSync(URL.directory + path)));
         if (req.method == 'GET') {
           keys.splice(id, 1);
         }

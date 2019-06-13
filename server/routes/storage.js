@@ -33,23 +33,15 @@ router.delete('/', auth, async function async(req, res) {
 async function deleteElement(req, res) {
   try {
     let path = '/' + req.params[0];
-    if (path.includes('.')) {
-      fs.unlink(URL.directory + path, function (err) {
-        if (!err) {
-          res.send({ status: 'Element deleted' });
-        } else {
-          res.status(500).send(err);
-        }
-      });
-    } else {
-      if (fs.existsSync(URL.directory + path)) {
-        rimraf(URL.directory + path, function () {
-          res.send({ status: 'Element deleted' });
-        })
-      } else {
+
+    if (fs.existsSync(URL.directory + path)) {
+      rimraf(URL.directory + path, function () {
         res.send({ status: 'Element deleted' });
-      }
+      })
+    } else {
+      res.send({ status: 'Element deleted' });
     }
+
   } catch (error) {
     res.status(500).send(err);
   }

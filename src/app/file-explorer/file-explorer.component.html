@@ -15,6 +15,9 @@
     <button mat-icon-button color="primary" matTooltip="Criar nova pasta">
       <mat-icon class="pointer" (click)="openNewFolderDialog()">create_new_folder</mat-icon>
     </button>
+    <button mat-icon-button color="primary" matTooltip="Opções" [matMenuTriggerFor]="menu">
+      <mat-icon class="pointer">more_vert</mat-icon>
+    </button>
   </mat-toolbar>
 
   <div>
@@ -23,19 +26,23 @@
       class="well my-drop-zone">
       <div class="content" fxFlex fxLayout="row">
         <mat-grid-list [responsiveCols]="{xs: 1, sm: 2, md: 3, lg: 5, xl: 7}" rowHeight="100px" fxFlex>
-          <mat-grid-tile *ngFor="let element of fileElements" class=file-or-folder>
-            <span [matMenuTriggerFor]="rootMenu" [matMenuTriggerData]="{element: element}"
-              #menuTrigger="matMenuTrigger"></span>
-            <div fxLayout="column" fxLayoutAlign="space-between center" (click)="navigate(element)"
-              (contextmenu)="openMenu($event, menuTrigger)">
-              <mat-icon color="primary" class="file-or-folder-icon pointer" *ngIf="element.isFolder">folder</mat-icon>
-              <mat-icon color="primary" class="file-or-folder-icon pointer" *ngIf="!element.isFolder"
-                (click)="download(element)" matTooltip="Download">insert_drive_file
-              </mat-icon>
-              <span>{{element.name}}</span>
-              <mat-progress-bar mode="determinate" *ngIf="!element.isFolder && element.progress"
-                [value]="element.progress"></mat-progress-bar>
-            </div>
+          <mat-grid-tile *ngFor="let element of fileElements" class=file-or-folder style="padding: 10px">
+            <mat-card class="box">
+              <mat-checkbox color="primary" class="checkbox" [(ngModel)]="element.checked"></mat-checkbox>
+              <span [matMenuTriggerFor]="rootMenu" [matMenuTriggerData]="{element: element}"
+                #menuTrigger="matMenuTrigger"></span>
+              <div fxLayout="column" fxLayoutAlign="space-between center" (click)="navigate(element)"
+                (contextmenu)="openMenu($event, menuTrigger)">
+                <mat-icon color="primary" class="file-or-folder-icon pointer" *ngIf="element.isFolder">folder</mat-icon>
+                <mat-icon color="primary" class="file-or-folder-icon pointer" *ngIf="!element.isFolder"
+                  (click)="download(element)" matTooltip="Download">insert_drive_file
+                </mat-icon>
+
+                <span>{{element.name}}</span>
+                <mat-progress-bar mode="determinate" *ngIf="!element.isFolder && element.progress"
+                  [value]="element.progress"></mat-progress-bar>
+              </div>
+            </mat-card>
           </mat-grid-tile>
           <mat-grid-tile *ngFor="let element of uploader.queue" class=file-or-folder>
             <span [matMenuTriggerFor]="uploadMenu" [matMenuTriggerData]="{element: element}"
@@ -112,5 +119,22 @@
       <button *ngIf="element.isFolder && element.id !== self.id" mat-menu-item
         (click)="moveElement(self, element)">{{element.name}}</button>
     </ng-container>
+  </ng-template>
+</mat-menu>
+
+<mat-menu #menu="matMenu">
+  <ng-template matMenuContent>
+    <button mat-menu-item (click)="cuts()">
+      <mat-icon svgIcon="file_cut"></mat-icon>
+      <span>Cut</span>
+    </button>
+    <button mat-menu-item (click)="pastes()" [disabled]="!clipboard">
+      <mat-icon>assignment</mat-icon>
+      <span>Paste</span>
+    </button>
+    <button mat-menu-item (click)="deleteElements()">
+      <mat-icon>delete</mat-icon>
+      <span>Delete</span>
+    </button>
   </ng-template>
 </mat-menu>
