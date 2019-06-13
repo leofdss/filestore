@@ -19,6 +19,7 @@
     "nodemailer": "^5.1.1",
     "request": "^2.88.0",
     "rimraf": "^2.6.3",
+    "socket.io": "^2.2.0",
     "uuid": "^3.3.2"
   }
 }

@@ -5,8 +5,9 @@ import { FileElement } from '../model/element';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpRequest } from '@angular/common/http';
 import { FileUploader } from 'ng2-file-upload';
+import { environment } from 'src/environments/environment';
 
-const URL = 'http://localhost:3000/api';
+const URL = environment.server + '/api';
 
 export interface IFileService {
   add(fileElement: FileElement);
