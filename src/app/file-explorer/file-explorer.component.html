@@ -33,9 +33,9 @@
                 #menuTrigger="matMenuTrigger"></span>
               <div fxLayout="column" fxLayoutAlign="space-between center" (click)="navigate(element)"
                 (contextmenu)="openMenu($event, menuTrigger)">
-                <mat-icon color="primary" class="file-or-folder-icon pointer" *ngIf="element.isFolder">folder</mat-icon>
+                <mat-icon color="primary" class="file-or-folder-icon pointer" *ngIf="element.isFolder" style="color:goldenrod">folder</mat-icon>
                 <mat-icon color="primary" class="file-or-folder-icon pointer" *ngIf="!element.isFolder"
-                  (click)="download(element)" matTooltip="Download">insert_drive_file
+                  (click)="download(element)" matTooltip="Download" style="color:gray">insert_drive_file
                 </mat-icon>
 
                 <span>{{element.name}}</span>
