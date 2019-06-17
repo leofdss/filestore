@@ -92,6 +92,19 @@ export class FileExplorerComponent implements OnInit {
     }
     this.elementRemoved.emit(elements);
   }
+  copy(element: FileElement) {
+    this.copyEmitter.emit([element]);
+  }
+  copies(){
+    let elements = [];
+    for (let element of this.fileElements) {
+      if (element.checked) {
+        elements.push(element);
+      }
+    }
+    //console.log(elements);
+    this.copyEmitter.emit(elements);
+  }
   cut(element: FileElement) {
     this.cutEmitter.emit([element]);
   }
@@ -102,13 +115,13 @@ export class FileExplorerComponent implements OnInit {
         elements.push(element);
       }
     }
-    console.log(elements)
+    //console.log(elements);
     this.cutEmitter.emit(elements);
   }
   paste(element: FileElement) {
     this.pasteEmitter.emit(element);
   }
-  pastes(){
+  pastes() {
     this.pastesEmitter.emit();
   }
 

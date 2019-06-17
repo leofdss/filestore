@@ -10,31 +10,20 @@ async function socket(client) {
 }
 
 async function copy(json, client) {
-  console.time('copying');
   let path = json.path;
   let oldPath = json.oldPath;
-  fs.stat(URL.directory + oldPath, function (err, stat) {
-    if (!err) {
-      const filesize = stat.size;
-      let bytesCopied = 0;
+  var recursive_copy = require('recursive-copy');
 
-      const readStream = fs.createReadStream(URL.directory + oldPath);
-
-      readStream.on('data', function (buffer) {
-        bytesCopied += buffer.length;
-        let percentage = ((bytesCopied / filesize) * 100).toFixed(2);
-        console.log(percentage + '%'); // run once with this and later with this line commented
-        client.emit('copy', { percentage: percentage });
-      });
-      readStream.on('end', function () {
-        client.emit('copy', { percentage: '100' });
-        console.timeEnd('copying');
-      });
-      readStream.pipe(fs.createWriteStream(URL.directory + path));
+  recursive_copy(URL.directory + oldPath, URL.directory + path, function (error, results) {
+    if (error) {
+      console.error('Copy failed: ' + error);
+      client.emit('copy', { error: error });
     } else {
-      client.emit('copy', { error: err });
+      console.info('Copied ' + results.length + ' files');
+      client.emit('copy', { results: results });
     }
-  })
+  });
 }
+
 
 module.exports = socket;

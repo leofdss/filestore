@@ -66,6 +66,9 @@ export class AppComponent {
     } else {
       path = this.root + '/' + this.currentPath + element.name;
     }
+    path = path.replace(/[/]/gi, ':');
+    path = path.replace(/::/gi, '/');
+    path = path.replace(/:/gi, '/');
     this.fileService.download(path).subscribe((data: any) => {
       let url = URL + '/download/' + data.key;
 
@@ -114,6 +117,9 @@ export class AppComponent {
     } else {
       path = '/' + this.root + '/' + this.currentPath + folder.name;
     }
+    path = path.replace(/[/]/gi, ':');
+    path = path.replace(/::/gi, '/');
+    path = path.replace(/:/gi, '/');
     this.fileService.createFolder(path)
       .subscribe((data) => {
         this.fileService.add({
@@ -138,6 +144,9 @@ export class AppComponent {
         } else {
           path = this.root + '/' + this.currentPath + element.name;
         }
+        path = path.replace(/[/]/gi, ':');
+        path = path.replace(/::/gi, '/');
+        path = path.replace(/:/gi, '/');
         this.fileService.deleteFiles(path)
           .subscribe(data => {
             this.fileService.delete(element.id);
@@ -194,6 +203,12 @@ export class AppComponent {
       oldPath = '/' + this.root + '/' + this.currentPath + event.element.name;
       path = '/' + this.root + '/' + this.currentPath + event.moveTo.name + '/' + event.element.name;
     }
+    path = path.replace(/[/]/gi, ':');
+    path = path.replace(/::/gi, '/');
+    path = path.replace(/:/gi, '/');
+    oldPath = oldPath.replace(/[/]/gi, ':');
+    oldPath = oldPath.replace(/::/gi, '/');
+    oldPath = oldPath.replace(/:/gi, '/');
     this.fileService.renameFiles({
       oldPath: oldPath,
       path: path
@@ -210,31 +225,6 @@ export class AppComponent {
     });
   }
 
-  copyElement(event: { element: FileElement; moveTo: FileElement }) {
-    let oldPath;
-    let path;
-    if (!this.currentPath) {
-      oldPath = '/' + this.root + '/' + event.element.name;
-      path = '/' + this.root + '/' + event.moveTo.name + '/' + event.element.name;
-    } else {
-      oldPath = '/' + this.root + '/' + this.currentPath + event.element.name;
-      path = '/' + this.root + '/' + this.currentPath + event.moveTo.name + '/' + event.element.name;
-    }
-    this.fileService.copy({
-      oldPath: oldPath,
-      path: path
-    });
-
-    let sub = this.websocketService.get('copy').subscribe((message) => {
-      console.log(message);
-
-      if (message.percentage == '100' || message.error) {
-        this.loading = false;
-      }
-      sub.unsubscribe();
-    });
-  }
-
   /** Renomear arquivo ou pasta */
   renameElement(element: FileElement) {
     let name = this.fileService.get(element.id).name;
@@ -247,6 +237,12 @@ export class AppComponent {
       oldPath = '/' + this.root + '/' + this.currentPath + name;
       path = '/' + this.root + '/' + this.currentPath + element.name;
     }
+    path = path.replace(/[/]/gi, ':');
+    path = path.replace(/::/gi, '/');
+    path = path.replace(/:/gi, '/');
+    oldPath = oldPath.replace(/[/]/gi, ':');
+    oldPath = oldPath.replace(/::/gi, '/');
+    oldPath = oldPath.replace(/:/gi, '/');
     this.fileService.renameFiles({
       oldPath: oldPath,
       path: path
@@ -272,11 +268,39 @@ export class AppComponent {
         } else {
           path = '/' + this.root + '/' + this.currentPath + element.name;
         }
+        path = path.replace(/[/]/gi, ':');
+        path = path.replace(/::/gi, '/');
+        path = path.replace(/:/gi, '/');
         this.clipboard.items.push({
           path: path,
           element: element
         })
       }
+    }
+  }
+
+  copy(elements: FileElement[]) {
+    if (elements) {
+      this.clipboard = {
+        method: 'copy',
+        items: []
+      }
+      for (let element of elements) {
+        let path = '';
+        if (!this.currentPath) {
+          path = '/' + this.root + '/' + element.name
+        } else {
+          path = '/' + this.root + '/' + this.currentPath + element.name;
+        }
+        path = path.replace(/[/]/gi, ':');
+        path = path.replace(/::/gi, '/');
+        path = path.replace(/:/gi, '/');
+        this.clipboard.items.push({
+          path: path,
+          element: element
+        })
+      }
+      console.log(this.clipboard)
     }
   }
 
@@ -288,20 +312,37 @@ export class AppComponent {
       } else {
         path = '/' + this.root + '/' + this.currentPath + '/' + item.element.name;
       }
-      this.fileService.renameFiles({
-        oldPath: item.path,
-        path: path
-      }).subscribe(data => {
-        if (this.currentRoot) {
-          this.fileService.update(item.element.id, { parent: this.currentRoot.id });
-          this.updateFileElementQuery();
-        } else {
-          this.fileService.update(item.element.id, { parent: 'root' });
-          this.updateFileElementQuery();
-        }
-      }, error => {
-        console.log(error);
-      });
+      path = path.replace(/[/]/gi, ':');
+      path = path.replace(/::/gi, '/');
+      path = path.replace(/:/gi, '/');
+      if (this.clipboard.method == 'cut') {
+        this.fileService.renameFiles({
+          oldPath: item.path,
+          path: path
+        }).subscribe(data => {
+          if (this.currentRoot) {
+            this.fileService.update(item.element.id, { parent: this.currentRoot.id });
+            this.updateFileElementQuery();
+          } else {
+            this.fileService.update(item.element.id, { parent: 'root' });
+            this.updateFileElementQuery();
+          }
+        }, error => {
+          console.log(error);
+        });
+      } else if (this.clipboard.method == 'copy') {
+        this.fileService.copy({
+          oldPath: item.path,
+          path: path
+        });
+
+        let sub = this.websocketService.get('copy').subscribe((message) => {
+          console.log(message);
+
+
+          //sub.unsubscribe();
+        });
+      }
     }
     this.clipboard = null;
   }
@@ -310,28 +351,77 @@ export class AppComponent {
     if (element) {
       for (let item of this.clipboard.items) {
         let path = '';
+        this.loading = true;
         if (!this.currentPath) {
           path = '/' + this.root + '/' + element.name + '/' + item.element.name;
         } else {
           path = '/' + this.root + '/' + this.currentPath + element.name + '/' + item.element.name;
         }
-        this.fileService.renameFiles({
-          oldPath: item.path,
-          path: path
-        }).subscribe(data => {
-          if (element.loading) {
-            this.fileService.update(item.element.id, { parent: element.id });
-            this.updateFileElementQuery();
+        path = path.replace(/[/]/gi, ':');
+        path = path.replace(/::/gi, '/');
+        path = path.replace(/:/gi, '/');
+        if (this.clipboard.method == 'cut') {
+          this.fileService.renameFiles({
+            oldPath: item.path,
+            path: path
+          }).subscribe(data => {
+            this.loading = false;
+            if (element.loading) {
+              this.fileService.update(item.element.id, { parent: element.id });
+              this.updateFileElementQuery();
+            } else {
+              this.fileService.delete(item.element.id);
+              this.updateFileElementQuery();
+            }
+          }, error => {
+            console.log(error);
+          });
+        } else if (this.clipboard.method == 'copy') {
+
+          this.fileService.copy({
+            oldPath: item.path,
+            path: path
+          });
+
+        }
+      }
+      if (this.clipboard.method == 'cut') {
+        this.clipboard = null;
+      } else if (this.clipboard.method == 'copy') {
+        let sub = this.websocketService.get('copy').subscribe((message) => {
+          console.log(message);
+
+          if (!message.error) {
+            if (message.results != '0' && message.results) {
+
+              let n = 0;
+
+              for (let i = 0; i < message.results.length; i++) {
+                for (let item of this.clipboard.items) {
+                  let src = '';
+                  console.log(src + ' - ' + item.path);
+                  if (src.includes(item.path)) {
+                    n++;
+                  }
+                }
+              }
+              if (n == this.clipboard.items.length) {
+                this.loading = false;
+                sub.unsubscribe();
+                this.clipboard = null;
+              }
+            }
           } else {
-            this.fileService.delete(item.element.id);
-            this.updateFileElementQuery();
+            if (message.code == "EEXIST") {
+
+            }
+            this.loading = false;
+            sub.unsubscribe();
+            this.clipboard = null;
           }
-        }, error => {
-          console.log(error);
         });
       }
     }
-    this.clipboard = null;
   }
 
   /** Atualiza elementos no HTML */
