@@ -3,6 +3,7 @@ import { FileService } from './service/file.service';
 import { Observable } from 'rxjs';
 import { FileElement } from './model/element';
 import { FileUploader } from 'ng2-file-upload';
+import { WebsocketService } from './service/websocket.service';
 const URL = 'http://localhost:3000/api';
 
 interface Clipboard {
@@ -23,6 +24,7 @@ export class AppComponent {
 
   constructor(
     public fileService: FileService,
+    private websocketService: WebsocketService
   ) { }
 
   currentRoot: FileElement;
@@ -205,6 +207,31 @@ export class AppComponent {
       }
     }, error => {
       console.log(error);
+    });
+  }
+
+  copyElement(event: { element: FileElement; moveTo: FileElement }) {
+    let oldPath;
+    let path;
+    if (!this.currentPath) {
+      oldPath = '/' + this.root + '/' + event.element.name;
+      path = '/' + this.root + '/' + event.moveTo.name + '/' + event.element.name;
+    } else {
+      oldPath = '/' + this.root + '/' + this.currentPath + event.element.name;
+      path = '/' + this.root + '/' + this.currentPath + event.moveTo.name + '/' + event.element.name;
+    }
+    this.fileService.copy({
+      oldPath: oldPath,
+      path: path
+    });
+
+    let sub = this.websocketService.get('copy').subscribe((message) => {
+      console.log(message);
+
+      if (message.percentage == '100' || message.error) {
+        this.loading = false;
+      }
+      sub.unsubscribe();
     });
   }
 

@@ -29,6 +29,14 @@ server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
+let socketIO = require('socket.io');
+let io = socketIO(server);
+let socket = require('../functions/copy');
+io.on('connection', (client) => {
+  console.log('user connected');
+  socket(client);
+});
+
 /**
  * Normalize a port into a number, string, or false.
  */
