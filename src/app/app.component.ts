@@ -60,8 +60,10 @@ export class AppComponent {
   }
 
   download(element: FileElement) {
+    this.loading = true;
     let path = this.getPath([element.name]);
     this.fileService.download(path).subscribe((data: any) => {
+      this.loading = false;
       let url = URL + '/download/' + data.key;
 
       var a = document.createElement("a");
@@ -70,7 +72,7 @@ export class AppComponent {
       a.download = element.name;
       document.body.appendChild(a);
       a.click();
-    }, () => { });
+    }, () => { this.loading = false; });
   }
 
   /** Busca arquivos no servidor */
@@ -103,9 +105,11 @@ export class AppComponent {
 
   /** Adiciona uma nova pasta */
   addFolder(folder: { name: string }) {
+    this.loading = true;
     let path = this.getPath([folder.name]);
     this.fileService.createFolder(path)
       .subscribe((data) => {
+        this.loading = false;
         this.fileService.add({
           isFolder: true,
           loading: false,
@@ -114,6 +118,7 @@ export class AppComponent {
         });
         this.updateFileElementQuery();
       }, (error) => {
+        this.loading = false;
         console.log(error);
       })
   }
@@ -122,12 +127,15 @@ export class AppComponent {
   removeElement(elements: FileElement[]) {
     if (elements) {
       for (let element of elements) {
+        this.loading = true;
         let path = this.getPath([element.name]);
         this.fileService.deleteFiles(path)
           .subscribe(data => {
+            this.loading = false;
             this.fileService.delete(element.id);
             this.updateFileElementQuery();
           }, error => {
+            this.loading = false;
             console.log(error);
           });
       }
@@ -170,12 +178,14 @@ export class AppComponent {
 
   /** Mover arquivo ou pasta */
   moveElement(event: { element: FileElement; moveTo: FileElement }) {
+    this.loading = true;
     let oldPath = this.getPath([event.element.name]);
     let path = this.getPath([event.moveTo.name, event.element.name]);
     this.fileService.renameFiles({
       oldPath: oldPath,
       path: path
     }).subscribe(data => {
+      this.loading = false;
       if (event.moveTo.loading) {
         this.fileService.update(event.element.id, { parent: event.moveTo.id });
         this.updateFileElementQuery();
@@ -184,12 +194,14 @@ export class AppComponent {
         this.updateFileElementQuery();
       }
     }, error => {
+      this.loading = false;
       console.log(error);
     });
   }
 
   /** Renomear arquivo ou pasta */
   renameElement(element: FileElement) {
+    this.loading = true;
     let name = this.fileService.get(element.id).name;
     let oldPath = this.getPath([name]);
     let path = this.getPath([element.name]);
@@ -197,9 +209,11 @@ export class AppComponent {
       oldPath: oldPath,
       path: path
     }).subscribe((data) => {
+      this.loading = false;
       this.fileService.update(element.id, { name: element.name });
       this.updateFileElementQuery();
     }, (error) => {
+      this.loading = false;
       console.error("An error occurred, ", error);
     });
   }
@@ -295,7 +309,9 @@ export class AppComponent {
                   copy.isFolder = this.clipboard.items[j].element.isFolder;
                   copy.name = this.clipboard.items[j].element.name;
                   if (element) {
-                    copy.parent = element.id;
+                    if (element.loading) {
+                      copy.parent = element.id;
+                    }
                   } else {
                     if (this.currentRoot) {
                       copy.parent = this.currentRoot.id;

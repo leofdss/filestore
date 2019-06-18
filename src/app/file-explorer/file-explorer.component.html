@@ -42,6 +42,7 @@
                 <span>{{element.name}}</span>
                 <mat-progress-bar mode="determinate" *ngIf="!element.isFolder && element.progress"
                   [value]="element.progress"></mat-progress-bar>
+                <span *ngIf="!element.isFolder && element.progress">{{element.progress}}%</span>
               </div>
             </mat-card>
           </mat-grid-tile>
@@ -59,6 +60,7 @@
 
               <span>{{element?.file?.name}}</span>
               <mat-progress-bar mode="determinate" [value]="element.progress"></mat-progress-bar>
+              <span>{{element.progress}}%</span>
             </div>
           </mat-grid-tile>
         </mat-grid-list>
