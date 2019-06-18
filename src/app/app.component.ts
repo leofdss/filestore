@@ -285,20 +285,31 @@ export class AppComponent {
       this.clipboard = null;
     } else if (this.clipboard.method == 'copy') {
       let sub = this.websocketService.get('copy').subscribe((message) => {
-
         if (!message.error && message.results) {
           if (message.results != '0') {
-
             for (let i = 0; i < message.results.length; i++) {
               for (let j = 0; j < this.clipboard.items.length; j++) {
                 let src = message.results[i].src;
                 if (src.includes(this.clipboard.items[j].path)) {
+                  let copy = new FileElement();
+                  copy.isFolder = this.clipboard.items[j].element.isFolder;
+                  copy.name = this.clipboard.items[j].element.name;
+                  if (element) {
+                    copy.parent = element.id;
+                  } else {
+                    if (this.currentRoot) {
+                      copy.parent = this.currentRoot.id;
+                    } else {
+                      copy.parent = 'root';
+                    }
+                  }
+                  this.fileService.add(copy);
+                  this.updateFileElementQuery();
                   this.clipboard.items.splice(j, 1);
                   break;
                 }
               }
             }
-
             if (this.clipboard.items.length == 0) {
               this.loading = false;
               sub.unsubscribe();
