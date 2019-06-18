@@ -78,7 +78,6 @@ export class FileExplorerComponent implements OnInit {
   @Output() copyEmitter = new EventEmitter<FileElement[]>();
   @Output() cutEmitter = new EventEmitter<FileElement[]>();
   @Output() pasteEmitter = new EventEmitter<FileElement>();
-  @Output() pastesEmitter = new EventEmitter();
 
   deleteElement(element: FileElement) {
     this.elementRemoved.emit([element]);
@@ -120,9 +119,6 @@ export class FileExplorerComponent implements OnInit {
   }
   paste(element: FileElement) {
     this.pasteEmitter.emit(element);
-  }
-  pastes() {
-    this.pastesEmitter.emit();
   }
 
   navigate(element: FileElement) {
