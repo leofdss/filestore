@@ -3,7 +3,7 @@
     [clipboard]="clipboard" (folderAdded)="addFolder($event)" (elementRemoved)="removeElement($event)"
     (navigatedDown)="navigateToFolder($event)" (navigatedUp)="navigateUp()" (elementRenamed)="renameElement($event)"
     (elementMoved)="moveElement($event)" (updateEmitter)="update()" [uploader]="uploader" [loading]="loading"
-    (downloadEmitter)="download($event)" (cutEmitter)="cut($event)" (pasteEmitter)="paste($event)"
-    (pastesEmitter)="pastes()" style="overflow: hidden;">
+    (downloadEmitter)="download($event)" (cutEmitter)="cut($event)" (copyEmitter)="copy($event)"
+    (pasteEmitter)="paste($event)" style="overflow: hidden;">
   </app-file-explorer>
 </div>

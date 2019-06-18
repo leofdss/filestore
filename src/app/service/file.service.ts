@@ -6,6 +6,7 @@ import { Observable, BehaviorSubject } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpRequest } from '@angular/common/http';
 import { FileUploader } from 'ng2-file-upload';
 import { environment } from 'src/environments/environment';
+import { WebsocketService } from './websocket.service';
 
 const URL = environment.server + '/api';
 
@@ -22,6 +23,7 @@ export class FileService implements IFileService {
   private map = new Map<string, FileElement>();
 
   constructor(
+    public websocketService: WebsocketService,
     private http: HttpClient
   ) { }
 
@@ -130,5 +132,15 @@ export class FileService implements IFileService {
 
   clone(element: FileElement) {
     return JSON.parse(JSON.stringify(element));
+  }
+
+  copy(options: { oldPath: string, path: string }) {
+    const json = {
+      session: localStorage.getItem('session'),
+      method: 'copy',
+      oldPath: options.oldPath,
+      path: options.path
+    };
+    this.websocketService.send(json.method, json);
   }
 }

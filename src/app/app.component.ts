@@ -3,6 +3,7 @@ import { FileService } from './service/file.service';
 import { Observable } from 'rxjs';
 import { FileElement } from './model/element';
 import { FileUploader } from 'ng2-file-upload';
+import { WebsocketService } from './service/websocket.service';
 const URL = 'http://localhost:3000/api';
 
 interface Clipboard {
@@ -23,6 +24,7 @@ export class AppComponent {
 
   constructor(
     public fileService: FileService,
+    private websocketService: WebsocketService
   ) { }
 
   currentRoot: FileElement;
@@ -58,22 +60,19 @@ export class AppComponent {
   }
 
   download(element: FileElement) {
-    let path;
-    if (!this.currentPath) {
-      path = this.root + '/' + element.name;
-    } else {
-      path = this.root + '/' + this.currentPath + element.name;
-    }
+    this.loading = true;
+    let path = this.getPath([element.name]);
     this.fileService.download(path).subscribe((data: any) => {
+      this.loading = false;
       let url = URL + '/download/' + data.key;
 
-      var a = document.createElement("a")
-      a.style.display = "none"
+      var a = document.createElement("a");
+      a.style.display = "none";
       a.href = url;
       a.download = element.name;
       document.body.appendChild(a);
       a.click();
-    }, () => { });
+    }, () => { this.loading = false; });
   }
 
   /** Busca arquivos no servidor */
@@ -106,14 +105,11 @@ export class AppComponent {
 
   /** Adiciona uma nova pasta */
   addFolder(folder: { name: string }) {
-    let path;
-    if (!this.currentPath) {
-      path = '/' + this.root + '/' + folder.name;
-    } else {
-      path = '/' + this.root + '/' + this.currentPath + folder.name;
-    }
+    this.loading = true;
+    let path = this.getPath([folder.name]);
     this.fileService.createFolder(path)
       .subscribe((data) => {
+        this.loading = false;
         this.fileService.add({
           isFolder: true,
           loading: false,
@@ -122,6 +118,7 @@ export class AppComponent {
         });
         this.updateFileElementQuery();
       }, (error) => {
+        this.loading = false;
         console.log(error);
       })
   }
@@ -130,17 +127,15 @@ export class AppComponent {
   removeElement(elements: FileElement[]) {
     if (elements) {
       for (let element of elements) {
-        let path;
-        if (!this.currentPath) {
-          path = this.root + '/' + element.name;
-        } else {
-          path = this.root + '/' + this.currentPath + element.name;
-        }
+        this.loading = true;
+        let path = this.getPath([element.name]);
         this.fileService.deleteFiles(path)
           .subscribe(data => {
+            this.loading = false;
             this.fileService.delete(element.id);
             this.updateFileElementQuery();
           }, error => {
+            this.loading = false;
             console.log(error);
           });
       }
@@ -183,19 +178,14 @@ export class AppComponent {
 
   /** Mover arquivo ou pasta */
   moveElement(event: { element: FileElement; moveTo: FileElement }) {
-    let oldPath;
-    let path;
-    if (!this.currentPath) {
-      oldPath = '/' + this.root + '/' + event.element.name;
-      path = '/' + this.root + '/' + event.moveTo.name + '/' + event.element.name;
-    } else {
-      oldPath = '/' + this.root + '/' + this.currentPath + event.element.name;
-      path = '/' + this.root + '/' + this.currentPath + event.moveTo.name + '/' + event.element.name;
-    }
+    this.loading = true;
+    let oldPath = this.getPath([event.element.name]);
+    let path = this.getPath([event.moveTo.name, event.element.name]);
     this.fileService.renameFiles({
       oldPath: oldPath,
       path: path
     }).subscribe(data => {
+      this.loading = false;
       if (event.moveTo.loading) {
         this.fileService.update(event.element.id, { parent: event.moveTo.id });
         this.updateFileElementQuery();
@@ -204,30 +194,26 @@ export class AppComponent {
         this.updateFileElementQuery();
       }
     }, error => {
+      this.loading = false;
       console.log(error);
     });
   }
 
   /** Renomear arquivo ou pasta */
   renameElement(element: FileElement) {
+    this.loading = true;
     let name = this.fileService.get(element.id).name;
-    let oldPath;
-    let path;
-    if (!this.currentPath) {
-      oldPath = '/' + this.root + '/' + name;
-      path = '/' + this.root + '/' + element.name;
-    } else {
-      oldPath = '/' + this.root + '/' + this.currentPath + name;
-      path = '/' + this.root + '/' + this.currentPath + element.name;
-    }
+    let oldPath = this.getPath([name]);
+    let path = this.getPath([element.name]);
     this.fileService.renameFiles({
       oldPath: oldPath,
       path: path
     }).subscribe((data) => {
+      this.loading = false;
       this.fileService.update(element.id, { name: element.name });
       this.updateFileElementQuery();
     }, (error) => {
-      //catch the error
+      this.loading = false;
       console.error("An error occurred, ", error);
     });
   }
@@ -239,72 +225,123 @@ export class AppComponent {
         items: []
       }
       for (let element of elements) {
-        let path = '';
-        if (!this.currentPath) {
-          path = '/' + this.root + '/' + element.name
-        } else {
-          path = '/' + this.root + '/' + this.currentPath + element.name;
-        }
+        let path = this.getPath([element.name]);
         this.clipboard.items.push({
           path: path,
           element: element
         })
       }
+      console.log(this.clipboard);
     }
   }
 
-  pastes() {
-    for (let item of this.clipboard.items) {
-      let path = '';
-      if (!this.currentPath) {
-        path = '/' + this.root + '/' + item.element.name;
-      } else {
-        path = '/' + this.root + '/' + this.currentPath + '/' + item.element.name;
+  copy(elements: FileElement[]) {
+    if (elements) {
+      this.clipboard = {
+        method: 'copy',
+        items: []
       }
-      this.fileService.renameFiles({
-        oldPath: item.path,
-        path: path
-      }).subscribe(data => {
-        if (this.currentRoot) {
-          this.fileService.update(item.element.id, { parent: this.currentRoot.id });
-          this.updateFileElementQuery();
-        } else {
-          this.fileService.update(item.element.id, { parent: 'root' });
-          this.updateFileElementQuery();
-        }
-      }, error => {
-        console.log(error);
-      });
+      for (let element of elements) {
+        let path = this.getPath([element.name]);
+        this.clipboard.items.push({
+          path: path,
+          element: element
+        })
+      }
+      console.log(this.clipboard);
     }
-    this.clipboard = null;
   }
 
   paste(element: FileElement) {
-    if (element) {
-      for (let item of this.clipboard.items) {
-        let path = '';
-        if (!this.currentPath) {
-          path = '/' + this.root + '/' + element.name + '/' + item.element.name;
-        } else {
-          path = '/' + this.root + '/' + this.currentPath + element.name + '/' + item.element.name;
-        }
+    for (let item of this.clipboard.items) {
+      this.loading = true;
+      let path = '';
+      if (element) {
+        path = this.getPath([element.name, item.element.name]);
+      } else {
+        path = this.getPath([item.element.name]);
+      }
+      if (this.clipboard.method == 'cut') {
         this.fileService.renameFiles({
           oldPath: item.path,
           path: path
         }).subscribe(data => {
-          if (element.loading) {
-            this.fileService.update(item.element.id, { parent: element.id });
-            this.updateFileElementQuery();
+          this.loading = false;
+          if (element) {
+            if (element.loading) {
+              this.fileService.update(item.element.id, { parent: element.id });
+              this.updateFileElementQuery();
+            } else {
+              this.fileService.delete(item.element.id);
+              this.updateFileElementQuery();
+            }
           } else {
-            this.fileService.delete(item.element.id);
-            this.updateFileElementQuery();
+            if (this.currentRoot) {
+              this.fileService.update(item.element.id, { parent: this.currentRoot.id });
+              this.updateFileElementQuery();
+            } else {
+              this.fileService.update(item.element.id, { parent: 'root' });
+              this.updateFileElementQuery();
+            }
           }
         }, error => {
+          this.loading = false;
           console.log(error);
+        });
+      } else if (this.clipboard.method == 'copy') {
+        this.fileService.copy({
+          oldPath: item.path,
+          path: path
         });
       }
     }
-    this.clipboard = null;
+    if (this.clipboard.method == 'cut') {
+      this.clipboard = null;
+    } else if (this.clipboard.method == 'copy') {
+      let sub = this.websocketService.get('copy').subscribe((message) => {
+        if (!message.error && message.results) {
+          if (message.results != '0') {
+            for (let i = 0; i < message.results.length; i++) {
+              for (let j = 0; j < this.clipboard.items.length; j++) {
+                let src = message.results[i].src;
+                if (src.includes(this.clipboard.items[j].path)) {
+                  let copy = new FileElement();
+                  copy.isFolder = this.clipboard.items[j].element.isFolder;
+                  copy.name = this.clipboard.items[j].element.name;
+                  if (element) {
+                    if (element.loading) {
+                      copy.parent = element.id;
+                    }
+                  } else {
+                    if (this.currentRoot) {
+                      copy.parent = this.currentRoot.id;
+                    } else {
+                      copy.parent = 'root';
+                    }
+                  }
+                  this.fileService.add(copy);
+                  this.updateFileElementQuery();
+                  this.clipboard.items.splice(j, 1);
+                  break;
+                }
+              }
+            }
+            if (this.clipboard.items.length == 0) {
+              this.loading = false;
+              sub.unsubscribe();
+              this.clipboard = null;
+            }
+          }
+        } else {
+          if (message.code == "EEXIST") {
+
+          }
+          this.loading = false;
+          sub.unsubscribe();
+          this.clipboard = null;
+        }
+      });
+    }
   }
 
   /** Atualiza elementos no HTML */
@@ -324,5 +361,25 @@ export class AppComponent {
     split.splice(split.length - 2, 1);
     p = split.join('/');
     return p;
+  }
+
+  getPath(items: string[] = []): string {
+    let path = '';
+    if (!this.currentPath) {
+      path = '/' + this.root;
+    } else {
+      path = '/' + this.root + '/' + this.currentPath;
+    }
+    for (let item of items) {
+      path += '/' + item;
+    }
+    while (true) {
+      if (path.includes('//')) {
+        path = path.replace('//', '/');
+      } else {
+        break;
+      }
+    }
+    return path;
   }
 }
