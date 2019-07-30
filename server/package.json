@@ -15,6 +15,7 @@
     "express-zip": "^2.0.1",
     "fs": "0.0.1-security",
     "http-errors": "~1.6.2",
+    "lodash": "^4.17.15",
     "morgan": "~1.9.0",
     "multer": "^1.4.1",
     "nodemailer": "^5.1.1",
