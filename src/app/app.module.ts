@@ -7,6 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FileExplorerModule } from './file-explorer/file-explorer.module';
 import { FileService } from './service/file.service';
 import { HttpClientModule } from '@angular/common/http';
+import { MaterialModule } from './material-module';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { HttpClientModule } from '@angular/common/http';
     BrowserModule,
     BrowserAnimationsModule,
     FileExplorerModule,
-    HttpClientModule
+    HttpClientModule,
+    MaterialModule
   ],
   providers: [FileService],
   bootstrap: [AppComponent]
