@@ -21,11 +21,12 @@ export class WebsocketService {
   }
 
   public get(connection) {
-    return Observable.create((observer) => {
+    return new Observable((observer) => {
       this.socket.on(connection, (message) => {
-        observer.next(message);
+        setTimeout(() => {
+          observer.next(message);
+        }, 2000);
       });
     });
   }
-
 }

@@ -12,6 +12,7 @@
     "debug": "~2.6.9",
     "ejs": "^2.6.1",
     "express": "~4.16.0",
+    "express-zip": "^2.0.1",
     "fs": "0.0.1-security",
     "http-errors": "~1.6.2",
     "morgan": "~1.9.0",
@@ -22,5 +23,8 @@
     "rimraf": "^2.6.3",
     "socket.io": "^2.2.0",
     "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "eslint": "^6.1.0"
   }
 }

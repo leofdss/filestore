@@ -97,6 +97,14 @@
       <mat-icon>open_with</mat-icon>
       <span>Move To</span>
     </button>
+    <button mat-menu-item (click)="downloadFolder(element)" *ngIf="element.isFolder">
+      <mat-icon>cloud_download</mat-icon>
+      <span>Download</span>
+    </button>
+    <button mat-menu-item (click)="download(element)" *ngIf="!element.isFolder">
+      <mat-icon>cloud_download</mat-icon>
+      <span>Download</span>
+    </button>
     <button mat-menu-item (click)="openRenameDialog(element)">
       <mat-icon>edit</mat-icon>
       <span>Rename</span>
@@ -131,11 +139,15 @@
 
 <mat-menu #menu="matMenu">
   <ng-template matMenuContent>
+    <button mat-menu-item (click)="downloads()">
+      <mat-icon>cloud_download</mat-icon>
+      <span>Download</span>
+    </button>
     <button mat-menu-item (click)="cuts()">
       <mat-icon svgIcon="file_cut"></mat-icon>
       <span>Cut</span>
     </button>
-    <button mat-menu-item (click)="copies(element)">
+    <button mat-menu-item (click)="copies()">
       <mat-icon>file_copy</mat-icon>
       <span>Copy</span>
     </button>

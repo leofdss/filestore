@@ -49,6 +49,28 @@ export class FileService implements IFileService {
       });
   }
 
+  public downloads(paths: string[]): Observable<Object> {
+    return this.http.post(URL + '/download', {
+      paths: paths
+    }, {
+        headers: new HttpHeaders({
+          'Authorization': localStorage.getItem('session'),
+          'Content-Type': 'application/json'
+        })
+      });
+  }
+
+  public downloadFolder(path: string): Observable<Object> {
+    return this.http.post(URL + '/download', {
+      folder: path
+    }, {
+        headers: new HttpHeaders({
+          'Authorization': localStorage.getItem('session'),
+          responseType: "arraybuffer"
+        })
+      });
+  }
+
   add(fileElement: FileElement) {
     fileElement.id = v4();
     this.map.set(fileElement.id, this.clone(fileElement));

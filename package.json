@@ -22,7 +22,6 @@
     "@angular/platform-browser": "~8.1.3",
     "@angular/platform-browser-dynamic": "~8.1.3",
     "@angular/router": "~8.1.3",
-    "express-zip": "^2.0.1",
     "hammerjs": "^2.0.8",
     "ng2-file-upload": "^1.3.0",
     "ngx-mask": "^8.0.2",

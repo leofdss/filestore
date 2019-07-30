@@ -73,6 +73,8 @@ export class FileExplorerComponent implements OnInit {
   @Output() elementMoved = new EventEmitter<{ element: FileElement; moveTo: FileElement }>();
   @Output() navigatedDown = new EventEmitter<FileElement>();
   @Output() downloadEmitter = new EventEmitter<FileElement>();
+  @Output() downloadsEmitter = new EventEmitter<FileElement[]>();
+  @Output() downloadFolderEmitter = new EventEmitter<FileElement>();
   @Output() navigatedUp = new EventEmitter();
   @Output() updateEmitter = new EventEmitter();
   @Output() copyEmitter = new EventEmitter<FileElement[]>();
@@ -94,7 +96,7 @@ export class FileExplorerComponent implements OnInit {
   copy(element: FileElement) {
     this.copyEmitter.emit([element]);
   }
-  copies(){
+  copies() {
     let elements = [];
     for (let element of this.fileElements) {
       if (element.checked) {
@@ -148,6 +150,19 @@ export class FileExplorerComponent implements OnInit {
 
   download(element: FileElement) {
     this.downloadEmitter.emit(element);
+  }
+  downloadFolder(element: FileElement) {
+    this.downloadFolderEmitter.emit(element);
+  }
+  downloads() {
+    let elements = [];
+    for (let element of this.fileElements) {
+      if (element.checked) {
+        elements.push(element);
+      }
+    }
+    //console.log(elements);
+    this.downloadsEmitter.emit(elements);
   }
 
   update() {

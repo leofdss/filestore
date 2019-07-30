@@ -1,9 +1,10 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { FileService } from './service/file.service';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { FileElement } from './model/element';
 import { FileUploader } from 'ng2-file-upload';
 import { WebsocketService } from './service/websocket.service';
+import { delay } from 'q';
 const URL = 'http://localhost:3000/api';
 
 interface Clipboard {
@@ -19,13 +20,15 @@ interface Clipboard {
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
   public fileElements: Observable<FileElement[]>;
 
   constructor(
     public fileService: FileService,
     private websocketService: WebsocketService
   ) { }
+
+  sub: Subscription;
 
   currentRoot: FileElement;
   currentPath: string;
@@ -40,6 +43,10 @@ export class AppComponent {
   ngOnInit() {
     localStorage.setItem('session', '123');
     this.update();
+  }
+
+  ngOnDestroy() {
+    this.sub.unsubscribe();
   }
 
   /** Atualiza itens na tela com o servidor */
@@ -57,12 +64,54 @@ export class AppComponent {
     this.uploader.onCompleteAll = () => {
       this.update();
     };
+    this.sub = this.websocketService.get('copy').pipe().subscribe((message: any) => {
+      if (!message.error && message.results) {
+        this.update();
+      }
+    });
   }
 
   download(element: FileElement) {
     this.loading = true;
     let path = this.getPath([element.name]);
     this.fileService.download(path).subscribe((data: any) => {
+      this.loading = false;
+      let url = URL + '/download/' + data.key;
+
+      var a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      a.download = element.name;
+      document.body.appendChild(a);
+      a.click();
+    }, () => { this.loading = false; });
+  }
+
+  downloads(elements: FileElement[]) {
+    this.loading = true;
+    let paths = [];
+    if (elements) {
+      for (let element of elements) {
+        let path = this.getPath([element.name]);
+        paths.push(path);
+      }
+    }
+    this.fileService.downloads(paths).subscribe((data: any) => {
+      this.loading = false;
+      let url = URL + '/download/' + data.key;
+
+      var a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      document.body.appendChild(a);
+      a.click();
+    }, () => { this.loading = false; });
+  }
+
+  downloadFolder(element: FileElement) {
+    this.loading = true;
+    let path = this.getPath([element.name]);
+    this.fileService.downloadFolder(path).subscribe((data: any) => {
       this.loading = false;
       let url = URL + '/download/' + data.key;
 
@@ -295,53 +344,7 @@ export class AppComponent {
         });
       }
     }
-    if (this.clipboard.method == 'cut') {
-      this.clipboard = null;
-    } else if (this.clipboard.method == 'copy') {
-      let sub = this.websocketService.get('copy').subscribe((message) => {
-        if (!message.error && message.results) {
-          if (message.results != '0') {
-            for (let i = 0; i < message.results.length; i++) {
-              for (let j = 0; j < this.clipboard.items.length; j++) {
-                let src = message.results[i].src;
-                if (src.includes(this.clipboard.items[j].path)) {
-                  let copy = new FileElement();
-                  copy.isFolder = this.clipboard.items[j].element.isFolder;
-                  copy.name = this.clipboard.items[j].element.name;
-                  if (element) {
-                    if (element.loading) {
-                      copy.parent = element.id;
-                    }
-                  } else {
-                    if (this.currentRoot) {
-                      copy.parent = this.currentRoot.id;
-                    } else {
-                      copy.parent = 'root';
-                    }
-                  }
-                  this.fileService.add(copy);
-                  this.updateFileElementQuery();
-                  this.clipboard.items.splice(j, 1);
-                  break;
-                }
-              }
-            }
-            if (this.clipboard.items.length == 0) {
-              this.loading = false;
-              sub.unsubscribe();
-              this.clipboard = null;
-            }
-          }
-        } else {
-          if (message.code == "EEXIST") {
-
-          }
-          this.loading = false;
-          sub.unsubscribe();
-          this.clipboard = null;
-        }
-      });
-    }
+    this.clipboard = null;
   }
 
   /** Atualiza elementos no HTML */
