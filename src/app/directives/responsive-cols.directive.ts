@@ -1,5 +1,5 @@
 import { Directive, Input, OnInit } from '@angular/core';
-import { MatGridList } from '@angular/material';
+import { MatGridList } from '@angular/material/grid-list';
 import { MediaObserver, MediaChange } from '@angular/flex-layout';
 
 export interface IResponsiveColumnsMap {
