@@ -1,6 +1,6 @@
 import { Component, OnInit, EventEmitter, Input, Output } from '@angular/core';
 import { FileUploader } from 'ng2-file-upload';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { FileElement } from '../model/element';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { NewFolderDialogComponent } from './modals/newFolderDialog/newFolderDialog.component';
