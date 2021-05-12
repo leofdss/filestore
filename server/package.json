@@ -18,7 +18,7 @@
     "lodash": "^4.17.15",
     "morgan": "~1.9.0",
     "multer": "^1.4.1",
-    "nodemailer": "^5.1.1",
+    "nodemailer": "^6.4.16",
     "recursive-copy": "^2.0.10",
     "request": "^2.88.0",
     "rimraf": "^2.6.3",
